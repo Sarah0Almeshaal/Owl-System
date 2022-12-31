@@ -6,7 +6,17 @@ import cv2
 from keras.models import load_model
 from collections import deque
 import os
+import mysql.connector
 
+db = mysql.connector.connect(
+    host="localhost",
+    user="owlsys",
+    password="admin",
+    database="owlsys"
+)
+
+mycursor = db.cursor()
+db.close()
 
 def capture_violence():
         print("Loading model ...")
