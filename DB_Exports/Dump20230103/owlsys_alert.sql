@@ -18,27 +18,26 @@ USE `owlsys`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `camera`
+-- Table structure for table `alert`
 --
 
-DROP TABLE IF EXISTS `camera`;
+DROP TABLE IF EXISTS `alert`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `camera` (
-  `camIP` varchar(255) NOT NULL,
-  `FloorID` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`camIP`),
-  UNIQUE KEY `camIP_UNIQUE` (`camIP`)
+CREATE TABLE `alert` (
+  `ID` int unsigned NOT NULL AUTO_INCREMENT,
+  `Status` varchar(45) NOT NULL,
+  PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `camera`
+-- Dumping data for table `alert`
 --
 
-LOCK TABLES `camera` WRITE;
-/*!40000 ALTER TABLE `camera` DISABLE KEYS */;
-/*!40000 ALTER TABLE `camera` ENABLE KEYS */;
+LOCK TABLES `alert` WRITE;
+/*!40000 ALTER TABLE `alert` DISABLE KEYS */;
+/*!40000 ALTER TABLE `alert` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-01-02 13:59:29
+-- Dump completed on 2023-01-02 17:28:41

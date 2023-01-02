@@ -18,32 +18,32 @@ USE `owlsys`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `receive`
+-- Table structure for table `assigned_to`
 --
 
-DROP TABLE IF EXISTS `receive`;
+DROP TABLE IF EXISTS `assigned_to`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `receive` (
+CREATE TABLE `assigned_to` (
+  `ID` int unsigned NOT NULL AUTO_INCREMENT,
+  `shiftID` int unsigned NOT NULL,
   `userID` int unsigned NOT NULL,
-  `alertID` int unsigned NOT NULL,
-  `ID` int unsigned NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `ID_UNIQUE` (`ID`),
-  KEY `ID_idx` (`alertID`),
-  KEY `userID` (`userID`),
-  CONSTRAINT `alerID` FOREIGN KEY (`alertID`) REFERENCES `alert` (`ID`),
+  KEY `shiftID_idx` (`shiftID`),
+  KEY `userID_idx` (`userID`),
+  CONSTRAINT `shiftID` FOREIGN KEY (`shiftID`) REFERENCES `shift` (`ID`),
   CONSTRAINT `userID` FOREIGN KEY (`userID`) REFERENCES `user` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `receive`
+-- Dumping data for table `assigned_to`
 --
 
-LOCK TABLES `receive` WRITE;
-/*!40000 ALTER TABLE `receive` DISABLE KEYS */;
-/*!40000 ALTER TABLE `receive` ENABLE KEYS */;
+LOCK TABLES `assigned_to` WRITE;
+/*!40000 ALTER TABLE `assigned_to` DISABLE KEYS */;
+/*!40000 ALTER TABLE `assigned_to` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -55,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-01-02 13:59:29
+-- Dump completed on 2023-01-02 17:28:41

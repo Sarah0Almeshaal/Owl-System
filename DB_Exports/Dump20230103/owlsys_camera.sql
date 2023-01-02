@@ -18,32 +18,27 @@ USE `owlsys`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `send`
+-- Table structure for table `camera`
 --
 
-DROP TABLE IF EXISTS `send`;
+DROP TABLE IF EXISTS `camera`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `send` (
+CREATE TABLE `camera` (
   `camIP` varchar(255) NOT NULL,
-  `alertID` int unsigned NOT NULL,
-  `timestamp` timestamp NOT NULL,
-  `priority` int unsigned DEFAULT NULL,
+  `FloorID` int unsigned DEFAULT NULL,
   PRIMARY KEY (`camIP`),
-  UNIQUE KEY `camIP_UNIQUE` (`camIP`),
-  KEY `ID_idx` (`alertID`),
-  CONSTRAINT `camIP` FOREIGN KEY (`camIP`) REFERENCES `camera` (`camIP`),
-  CONSTRAINT `ID` FOREIGN KEY (`alertID`) REFERENCES `alert` (`ID`)
+  UNIQUE KEY `camIP_UNIQUE` (`camIP`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `send`
+-- Dumping data for table `camera`
 --
 
-LOCK TABLES `send` WRITE;
-/*!40000 ALTER TABLE `send` DISABLE KEYS */;
-/*!40000 ALTER TABLE `send` ENABLE KEYS */;
+LOCK TABLES `camera` WRITE;
+/*!40000 ALTER TABLE `camera` DISABLE KEYS */;
+/*!40000 ALTER TABLE `camera` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -55,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-01-02 13:59:29
+-- Dump completed on 2023-01-02 17:28:41
