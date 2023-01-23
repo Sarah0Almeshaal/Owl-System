@@ -117,6 +117,7 @@ while cam.isOpened():
             requests.post("http://127.0.0.1:5000/alert", 
             data={'Alert':'Violence Detected!!','CamNo':'2','Floor':'1'})
             sendAlert = 1
+            
 
     # if the `q` key was pressed, break from the loop
     if (cv2.waitKey(1) & 0xFF == ord("q")):
