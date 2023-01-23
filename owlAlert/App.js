@@ -15,8 +15,8 @@ export default function App() {
           headerShown: false,
         }}
       >
-        {/* <Stack.Screen name="Alerts" component={Feed} /> */}
-        <Stack.Screen name="HttpExample" component={HttpExample} />
+        <Stack.Screen name="Alerts" component={Feed} />
+        {/* <Stack.Screen name="HttpExample" component={HttpExample} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,10 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `owlsys` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `owlsys`;
--- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.30, for Win64 (x86_64)
 --
--- Host: localhost    Database: owlsys
+-- Host: 127.0.0.1    Database: owlsys
 -- ------------------------------------------------------
--- Server version	8.0.31
+-- Server version	8.0.30
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -18,27 +16,28 @@ USE `owlsys`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `camera`
+-- Table structure for table `shift`
 --
 
-DROP TABLE IF EXISTS `camera`;
+DROP TABLE IF EXISTS `shift`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `camera` (
-  `camIP` varchar(255) NOT NULL,
-  `FloorID` int unsigned DEFAULT NULL,
-  PRIMARY KEY (`camIP`),
-  UNIQUE KEY `camIP_UNIQUE` (`camIP`)
+CREATE TABLE `shift` (
+  `ID` int unsigned NOT NULL AUTO_INCREMENT,
+  `Date` datetime DEFAULT NULL,
+  `StartTime` time DEFAULT NULL,
+  `EndTime` time DEFAULT NULL,
+  PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `camera`
+-- Dumping data for table `shift`
 --
 
-LOCK TABLES `camera` WRITE;
-/*!40000 ALTER TABLE `camera` DISABLE KEYS */;
-/*!40000 ALTER TABLE `camera` ENABLE KEYS */;
+LOCK TABLES `shift` WRITE;
+/*!40000 ALTER TABLE `shift` DISABLE KEYS */;
+/*!40000 ALTER TABLE `shift` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-01-02 17:28:41
+-- Dump completed on 2023-01-19  3:12:37

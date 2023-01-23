@@ -115,6 +115,7 @@ while cam.isOpened():
             getDateTime()
             SaveVideo(output_path, W, H)
             sendAlert = 1
+            
 
     # if the `q` key was pressed, break from the loop
     if (cv2.waitKey(1) & 0xFF == ord("q")):
