@@ -3,7 +3,6 @@ import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Feed from "./Screens/AlertFeed";
-import HttpExample from "./backend-Page/HttpExample";
 
 const Stack = createStackNavigator();
 
@@ -15,8 +14,7 @@ export default function App() {
           headerShown: false,
         }}
       >
-        {/* <Stack.Screen name="Alerts" component={Feed} /> */}
-        <Stack.Screen name="HttpExample" component={HttpExample} />
+        <Stack.Screen name="Alerts" component={Feed} />
       </Stack.Navigator>
     </NavigationContainer>
   );
