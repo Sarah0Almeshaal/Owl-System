@@ -3,7 +3,13 @@
 // No Alert Logo
 import "react-native-gesture-handler";
 import * as React from "react";
-import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Platform,
+} from "react-native";
 import AlertBox from "../components/AlertBox";
 import TopHeader from "../components/TopHeader";
 import BottomHeader from "../components/BottomHeader";
@@ -13,11 +19,10 @@ export default function Feed() {
     <View style={styles.main}>
       <TopHeader />
       <SafeAreaView style={styles.container}>
+        {/* <NoAlertBox /> */}
         <ScrollView style={styles.scrollView}>
-          {/* ALL ALERTS ARE DISPLAYED HERE */}
+          {/* ----------------ALL ALERTS ARE DISPLAYED HERE---------------- */}
           <AlertBox alertId={1} vImage={require("../assets/image2.png")} />
-          <AlertBox alertId={2} vImage={require("../assets/image1.png")} />
-          {/* ALL ALERTS ARE DISPLAYED HERE  */}
         </ScrollView>
       </SafeAreaView>
       <BottomHeader />
@@ -38,8 +43,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   scrollView: {
+    flex: 1,
     backgroundColor: "#fff",
-    width: "100%",
     paddingVertical: 30,
     // display: "none",
   },

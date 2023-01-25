@@ -2,9 +2,9 @@ import "react-native-gesture-handler";
 import * as React from "react";
 import { StyleSheet, View, Image, Text } from "react-native";
 // isVisibale not Working!!!!!!!!!!!!!!!!!!!!!1
-export default function NoAlertBox(isVisable) {
+export default function NoAlertBox() {
   return (
-    <View style={[noAlertsBox.container, { display: { isVisable } }]}>
+    <View style={noAlertsBox.container}>
       <Image
         style={noAlertsBox.logo}
         source={require("../assets/owlsys-logo.png")}
@@ -21,6 +21,7 @@ const noAlertsBox = StyleSheet.create({
     justifyContent: "center",
     width: "50%",
     height: "40%",
+    marginTop: "50%",
   },
   logo: {
     width: 180,

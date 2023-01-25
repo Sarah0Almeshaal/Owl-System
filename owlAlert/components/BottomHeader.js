@@ -1,6 +1,6 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, Platform } from "react-native";
 
 export default function BottomHeader() {
   return (
@@ -32,6 +32,6 @@ const feed = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: "10%",
+    width: "11%",
   },
 });

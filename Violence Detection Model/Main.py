@@ -108,16 +108,23 @@ while cam.isOpened():
     cv2.putText(output, text, (35, 50), FONT, 1.25, text_color, 3)
 
     # show the output frame
-    cv2.imshow("CAM", output)
+    # cv2.imshow("CAM", output)
 
     if (trueCount == 40):
         if (sendAlert == 0):
             print("Violence Detected!!")
             # SaveVideo(output_path, W, H)
-            requests.post("http://127.0.0.1:5000/alert", 
-            data={'Alert':'Violence Detected!!','CamNo':'2','Floor':'1'})
+            try:
+                url = 'http://127.0.0.1:80/alert'
+                data= {'CamNo':2,'Floor':1}
+                 # 👇️ set verify to False
+                response = requests.post(url,data,verify=False)
+                parsed = response.json()
+                print(parsed)
+            except Exception as e:
+                print(e)
             sendAlert = 1
-            
+
 
     # if the `q` key was pressed, break from the loop
     if (cv2.waitKey(1) & 0xFF == ord("q")):

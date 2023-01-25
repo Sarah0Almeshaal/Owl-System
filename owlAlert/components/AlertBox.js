@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Platform } from "react-native";
 import AcceptButton from "./AcceptButton";
 import ResolvedButton from "./ResolvedButton";
 
@@ -31,8 +31,8 @@ export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
 const styles = StyleSheet.create({
   alert: {
     backgroundColor: "rgba(249, 182, 82, 0.75)",
-    width: 330,
-    height: 200,
+    width: Platform.OS === "ios" ? 330 : 300,
+    height: Platform.OS === "ios" ? 200 : 150,
     alignSelf: "center",
     marginBottom: 40,
     borderRadius: 10,
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   dataStyle: {
-    fontSize: 17,
+    fontSize: Platform.OS === "ios" ? 16 : 12,
     marginBottom: 3,
     marginTop: 3,
   },
