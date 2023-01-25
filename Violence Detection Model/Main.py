@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-import pytz
+# import pytz
 from datetime import datetime
 from tensorflow import keras
 import matplotlib.pyplot as plt
@@ -40,7 +40,7 @@ def SaveVideo(output_path, W, H):
 
 ##################### < Load Model > ######################
 print("Loading model ...")
-model = keras.models.load_model("model/modelnew.h5")
+model = keras.models.load_model("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/Model/modelnew.h5")
 
 ##################### < Violence Detect > ######################
 
