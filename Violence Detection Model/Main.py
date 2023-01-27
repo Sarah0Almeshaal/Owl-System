@@ -115,10 +115,9 @@ while cam.isOpened():
             print("Violence Detected!!")
             # SaveVideo(output_path, W, H)
             try:
-                url = 'http://127.0.0.1:80/alert'
-                data= {'CamNo':2,'Floor':1}
-                 # 👇️ set verify to False
-                response = requests.post(url,data,verify=False)
+                url = 'http://127.0.0.1:8000/alert'
+                info = {'cam':2,'floor':1}
+                response = requests.post(url,json = info,verify=False)
                 parsed = response.json()
                 print(parsed)
             except Exception as e:

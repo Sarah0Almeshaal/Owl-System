@@ -20,7 +20,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.owlsecuritysystem.owlalert"
+      "bundleIdentifier": "com.owlsecuritysystem.owlalert",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-remote-notification"]
+      }
     },
     "android": {
       "package":"com.owlsecuritysystem.owlalert",

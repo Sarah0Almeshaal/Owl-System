@@ -12,6 +12,7 @@ export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
             style={styles.alertLogo}
             source={require("../assets/alert-small-icon.png")}
           />
+          <Text style={styles.dataStyle}>ID: {alertId}</Text>
           <Text style={styles.dataStyle}>Floor No: {floorNo}</Text>
           <Text style={styles.dataStyle}>Camera No: {CamNo}</Text>
           <Text style={styles.dataStyle}>Responds No:{1}</Text>
