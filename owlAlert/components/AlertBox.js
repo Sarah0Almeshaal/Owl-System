@@ -12,7 +12,7 @@ export default function AlertBox({
   vImage,
 }) {
   postResponse = async (type, user_id, alert_id) => {
-    fetch(`http://192.168.1.29:5000/${type}`, {
+    fetch(`http://192.168.1.25:5000/${type}`, {
       method: "post",
       headers: {
         Accept: "application/json",
@@ -55,7 +55,6 @@ export default function AlertBox({
       <View style={styles.row2}>
         <ResolvedButton
           onPress={() => {
-            console.log("resloved btn no:" + alertId);
             removeAlert(alertId);
           }}
         />
