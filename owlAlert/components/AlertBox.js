@@ -12,7 +12,7 @@ export default function AlertBox({
   vImage,
 }) {
   postResponse = async (type, user_id, alert_id) => {
-    fetch(`http://192.168.1.35:5000/${type}`, {
+    fetch(`http://192.168.1.25:5000/${type}`, {
       method: "post",
       headers: {
         Accept: "application/json",

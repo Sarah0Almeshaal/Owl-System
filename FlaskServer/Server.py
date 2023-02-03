@@ -1,10 +1,8 @@
 import base64
 from flask import Flask, request, jsonify, json, session
-from flask_socketio import SocketIO, emit
 import mysql.connector
 import requests
 import time
-import logging
 
 
 app = Flask(__name__)
@@ -93,7 +91,7 @@ def sendAlert(token,cam,floor):
         },
     }
     response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
-    return response.con
+    return response.content
 
 @app.route('/alert', methods=['POST'])
 def getAlert():
@@ -107,9 +105,23 @@ def getAlert():
             sendAlert(user["token"],cam,floor)
         return jsonify({"message": "Data received successfully"})
     except Exception as e:
+        print(e)
+        return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
 
 
 # -----------------------------------
+
+
+@app.route("/alertImage")
+def sendAlertImage():
+    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+   
+    alertImage = {
+        "image": encoded_string,
+    }
+    return jsonify({"alert": alertImage})
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -139,17 +151,6 @@ def login():
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
 
-
-
-@app.route("/alertImage")
-def sendAlertImage():
-    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-   
-    alertImage = {
-        "image": encoded_string,
-    }
-    return jsonify({"alert": alertImage})
 
 @app.route('/logout', methods=['POST'])
 def logout():
