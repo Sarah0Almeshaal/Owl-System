@@ -33,46 +33,6 @@ def handleResolve(userId,alertId):
     print("resloved--> userId:{}  alertId:{}",userId,alertId)
     return jsonify({"result": 1})
 
-
-# @app.route('/alert', methods=['POST'])
-# def getAlert():
-#     data = request.get_json()
-#     user_str = json.dumps(data)
-#     user_json = json.loads(user_str)
-#     cam = user_json['cam']
-#     floor = user_json['floor']
-#     try:
-#         # process alert request (token and alert data)
-#         tokens = ["ExponentPushToken[mtkEeIDK9c65s7_VdO8W7C]","ExponentPushToken[Wja7nsAEjdSSoC_BzJtNct]"]
-#         # sendAlert(tokens,cam,floor)
-#         return jsonify({"message": "Data received successfully"})
-#     except Exception as e:
-#         print(e)
-#         return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
-
-# def sendAlert(token,cam,floor):
-#     global count
-#     count += 1
-#     to = []
-#     for t in token:
-#         to.append(t)
-#     message = {
-#         "to": to,
-#         "sound": 'default',
-#         "title": 'Violenece Detected',
-#         "body": "cam: {} floor: {}".format(cam,floor),
-#         "data":
-#         {
-#             "id":count,
-#             "cam": cam,
-#             "floor": floor,
-#             "pic": 1,
-#             "respondents": 2
-#         },
-#     }
-#     response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
-#     return response.content
-
 def sendAlert(token,cam,floor):
     global count
     count += 1
