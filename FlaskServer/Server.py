@@ -1,14 +1,19 @@
 import base64
 from flask import Flask, request, jsonify, json, session
-from flask_socketio import SocketIO, emit
 import mysql.connector
 import requests
-import logging
 
 
 app = Flask(__name__)
 count = 0
+try:
+    connection = mysql.connector.connect(host='localhost',
+        database='owlsys', user='owlsys', password='admin')
+except mysql.connector.Error as e:
+    print(e)
 
+users = []
+    
 @app.route('/accept',methods=['POST'])
 def handleAccept():
     try:
@@ -33,14 +38,32 @@ def getAlert():
     cam = user_json['cam']
     floor = user_json['floor']
     try:
-        tokens = ["ExponentPushToken[mtkEeIDK9c65s7_VdO8W7C]","ExponentPushToken[Wja7nsAEjdSSoC_BzJtNct]"]
-        sendAlert(tokens,cam,floor)
+        for user in users:
+            sendAlert(user["token"],cam,floor)
         return jsonify({"message": "Data received successfully"})
     except Exception as e:
         print(e)
         return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
 
-users = []
+def sendAlert(token,cam,floor):
+    global count
+    count += 1
+    message = {
+        "to": token,
+        "sound": 'default',
+        "title": 'Violenece Detected',
+        "body": "cam: {} floor: {}".format(cam,floor),
+        "data":
+        {
+            "id":count,
+            "cam": cam,
+            "floor": floor,
+            "pic": 1,
+            "respondents": 2
+        },
+    }
+    response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
+    return response.con
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -51,8 +74,6 @@ def login():
     password = user_json['password']
     token = user_json['token']
     try:
-        connection = mysql.connector.connect(host='localhost',
-                                             database='owlsys', user='owlsys', password='admin')
         sql_select_Query = "SELECT * FROM user where  Password='" + \
             password + "' and id = " + str(id)
 
@@ -60,7 +81,10 @@ def login():
         cursor.execute(sql_select_Query)
         cursor.fetchall()
         if cursor.rowcount > 0:
-            user = User(id, password, token)
+            user = {
+                "id": id,
+                "token": token
+            }
             users.append(user)
             return jsonify({"result": 1})
         else:
@@ -80,41 +104,15 @@ def login():
 #     print(cam)
 #     print(floor)
 
-
-@app.route('/notification')
-# def sendAlert(Alert):
-def sendAlert():
-    message = {
-        "to": "ExponentPushToken[mOTogOEEc592a0MduplUIY]",
-        "sound": 'default',
-        "title": 'App name',
-        "body": "Violenece Detected",
-        # "data":
-        # {
-        #     "cam": 3,
-        #     "floor": 1,
-        #     "Respondents": 0
-        # }
-    }
-    alert()
-    response = requests.post(
-        'https://exp.host/--/api/v2/push/send', json=message)
-    return response.content
-
-
-# def image(file):
-@app.route("/alert")
-def alert():
+@app.route("/alertImage")
+def sendAlertImage():
     with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-    alert = {
-        "cam": 3,
-        "floor": 1,
+   
+    alertImage = {
         "image": encoded_string,
-        "Respondents": 0
     }
-    return jsonify({"alert": alert})
-    # return requests.post('http://10.120.1.203:8000/alert', json=alert)
+    return jsonify({"alert": alertImage})
 
 
 @app.route('/logout', methods=['POST'])
