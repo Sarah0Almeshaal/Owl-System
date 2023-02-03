@@ -28,7 +28,7 @@ export default function AlertBox({
       })
       .then((data) => {
         console.log(data);
-        // removeAlert(alert_id);
+        removeAlert(alert_id);
       })
       .catch(function (error) {
         console.log(
