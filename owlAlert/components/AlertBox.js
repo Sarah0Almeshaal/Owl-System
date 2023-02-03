@@ -1,9 +1,42 @@
 import * as React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Platform } from "react-native";
 import AcceptButton from "./AcceptButton";
 import ResolvedButton from "./ResolvedButton";
 
-export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
+export default function AlertBox({
+  removeAlert,
+  alertId,
+  floorNo,
+  CamNo,
+  ResNo,
+  vImage,
+}) {
+  postResponse = async (type, user_id, alert_id) => {
+    fetch(`http://192.168.1.29:5000/${type}`, {
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user_id,
+        alertId: alert_id,
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        // removeAlert(alert_id);
+      })
+      .catch(function (error) {
+        console.log(
+          "There has been a problem with your fetch operation: " + error.message
+        );
+      });
+  };
+
   return (
     <View style={styles.alert}>
       <View style={styles.row1}>
@@ -12,17 +45,25 @@ export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
             style={styles.alertLogo}
             source={require("../assets/alert-small-icon.png")}
           />
-          <Text style={styles.dataStyle}>Floor No: {1}</Text>
-          <Text style={styles.dataStyle}>Camera No: {3}</Text>
+          <Text style={styles.dataStyle}>ID: {alertId}</Text>
+          <Text style={styles.dataStyle}>Floor No: {floorNo}</Text>
+          <Text style={styles.dataStyle}>Camera No: {CamNo}</Text>
           <Text style={styles.dataStyle}>Responds No:{1}</Text>
         </View>
         <Image style={styles.AlertImage} source={vImage} />
       </View>
       <View style={styles.row2}>
         <ResolvedButton
-          onPress={() => console.log("resloved btn no:" + alertId)}
+          onPress={() => {
+            console.log("resloved btn no:" + alertId);
+            removeAlert(alertId);
+          }}
         />
-        <AcceptButton onPress={() => console.log("Accept btn no:" + alertId)} />
+        <AcceptButton
+          onPress={() => {
+            postResponse("accept", 1, alertId);
+          }}
+        />
       </View>
     </View>
   );
@@ -31,8 +72,8 @@ export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
 const styles = StyleSheet.create({
   alert: {
     backgroundColor: "rgba(249, 182, 82, 0.75)",
-    width: 330,
-    height: 200,
+    width: Platform.OS === "ios" ? 330 : 300,
+    height: Platform.OS === "ios" ? 200 : 150,
     alignSelf: "center",
     marginBottom: 40,
     borderRadius: 10,
@@ -53,7 +94,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   dataStyle: {
-    fontSize: 17,
+    fontSize: Platform.OS === "ios" ? 16 : 12,
     marginBottom: 3,
     marginTop: 3,
   },

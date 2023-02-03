@@ -1,17 +1,49 @@
 import base64
 from flask import Flask, request, jsonify, json, session
+from flask_socketio import SocketIO, emit
 import mysql.connector
-from user import User
 import requests
 import time
+import logging
 
 
 app = Flask(__name__)
+count = 0;
+
+@app.route('/accept',methods=['POST'])
+def handleAccept():
+    try:
+        content = request.json
+        return jsonify({"result": 1,"alertid":content.get('alertId')})
+    except Exception as e:
+        return jsonify({'result':0,'messgae':e})
+
+
+@app.route('/resolve',methods=['POST'])
+def handleResolve(userId,alertId):
+    print("resloved--> userId:{}  alertId:{}",userId,alertId)
+    return jsonify({"result": 1})
+
+
+# ------------------------------------
+@app.route('/alert', methods=['POST'])
+def getAlert():
+    data = request.get_json()
+    user_str = json.dumps(data)
+    user_json = json.loads(user_str)
+    cam = user_json['cam']
+    floor = user_json['floor']
+    try:
+        tokens = ["ExponentPushToken[mtkEeIDK9c65s7_VdO8W7C]","ExponentPushToken[Wja7nsAEjdSSoC_BzJtNct]"]
+        sendAlert(tokens,cam,floor)
+        return jsonify({"message": "Data received successfully"})
+    except Exception as e:
+        print(e)
+        return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
 
 app.secret_key = b'47089c4644e037ffd565920f1821d1752bdcc3b246ab75e4789ba222ebb09706'
 users = []
-tokens = []
-
+# hashmap 
 
 @app.route('/login', methods=['POST'])
 def login():

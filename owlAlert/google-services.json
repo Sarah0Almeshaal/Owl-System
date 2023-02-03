@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1010688926167",
+    "project_id": "owlalert-591bf",
+    "storage_bucket": "owlalert-591bf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1010688926167:android:23f910fb35cd158cd92b92",
+        "android_client_info": {
+          "package_name": "com.owlsecuritysystem.owlalert"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1010688926167-3tbnku1lojlo2jpcqt6ospsqjpk1g58u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCqQaPk8v4yhv3sM5eGfReQW37iVIMPek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1010688926167-3tbnku1lojlo2jpcqt6ospsqjpk1g58u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
