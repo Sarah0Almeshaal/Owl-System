@@ -3,12 +3,11 @@ from flask import Flask, request, jsonify, json, session
 from flask_socketio import SocketIO, emit
 import mysql.connector
 import requests
-import time
 import logging
 
 
 app = Flask(__name__)
-count = 0;
+count = 0
 
 @app.route('/accept',methods=['POST'])
 def handleAccept():
@@ -41,9 +40,7 @@ def getAlert():
         print(e)
         return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
 
-app.secret_key = b'47089c4644e037ffd565920f1821d1752bdcc3b246ab75e4789ba222ebb09706'
 users = []
-# hashmap 
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -65,9 +62,6 @@ def login():
         if cursor.rowcount > 0:
             user = User(id, password, token)
             users.append(user)
-            # time.sleep(5)
-            # sendAlert(token)
-            print(token)
             return jsonify({"result": 1})
         else:
             return jsonify({"result": -1})
@@ -132,10 +126,6 @@ def logout():
     for user in users:
         if (user.id == id):
             users.remove(user)
-            for token in tokens:
-                if (user.token == token):
-                    tokens.remove(token)
-                    session.pop('token', None)
             return jsonify({"result": 1})
         else:
             return jsonify({"result": -1})
