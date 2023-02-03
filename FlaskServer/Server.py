@@ -3,18 +3,22 @@ from flask_socketio import SocketIO, emit
 import mysql.connector
 import requests
 import time
+import logging
+
 
 app = Flask(__name__)
-
 count = 0;
 
-@app.route('/accept/<int:user_id>/<int:alert_id>',methods=['POST'])
-def handleAccept(userId,alertId):
-    print("Accept--> userId:{}  alertId:{}",userId,alertId)
-    return jsonify({"result": 1})
+@app.route('/accept',methods=['POST'])
+def handleAccept():
+    try:
+        content = request.json
+        return jsonify({"result": 1,"alertid":content.get('alertId')})
+    except Exception as e:
+        return jsonify({'result':0,'messgae':e})
 
 
-@app.route('/resolve/<int:user_id>/<int:alert_id>',methods=['POST'])
+@app.route('/resolve',methods=['POST'])
 def handleResolve(userId,alertId):
     print("resloved--> userId:{}  alertId:{}",userId,alertId)
     return jsonify({"result": 1})
@@ -90,4 +94,4 @@ def login():
 
 
 if __name__ == '__main__':
-   app.run(host='0.0.0.0', port=5000,debug=True)
+   app.run(host='0.0.0.0',port=5000, debug=True)

@@ -3,7 +3,40 @@ import { StyleSheet, Text, View, Image, Platform } from "react-native";
 import AcceptButton from "./AcceptButton";
 import ResolvedButton from "./ResolvedButton";
 
-export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
+export default function AlertBox({
+  removeAlert,
+  alertId,
+  floorNo,
+  CamNo,
+  ResNo,
+  vImage,
+}) {
+  postResponse = async (type, user_id, alert_id) => {
+    fetch(`http://192.168.1.29:5000/${type}`, {
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user_id,
+        alertId: alert_id,
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        // removeAlert(alert_id);
+      })
+      .catch(function (error) {
+        console.log(
+          "There has been a problem with your fetch operation: " + error.message
+        );
+      });
+  };
+
   return (
     <View style={styles.alert}>
       <View style={styles.row1}>
@@ -21,9 +54,16 @@ export default function AlertBox({ alertId, floorNo, CamNo, ResNo, vImage }) {
       </View>
       <View style={styles.row2}>
         <ResolvedButton
-          onPress={() => console.log("resloved btn no:" + alertId)}
+          onPress={() => {
+            console.log("resloved btn no:" + alertId);
+            removeAlert(alertId);
+          }}
         />
-        <AcceptButton onPress={() => console.log("Accept btn no:" + alertId)} />
+        <AcceptButton
+          onPress={() => {
+            postResponse("accept", 1, alertId);
+          }}
+        />
       </View>
     </View>
   );

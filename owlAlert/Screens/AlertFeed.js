@@ -2,14 +2,7 @@ import "react-native-gesture-handler";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import * as React from "react";
-import {
-  StyleSheet,
-  View,
-  SafeAreaView,
-  ScrollView,
-  Platform,
-  Text,
-} from "react-native";
+import { StyleSheet, View, SafeAreaView, Platform, Text } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import AlertBox from "../components/AlertBox";
 import TopHeader from "../components/TopHeader";
@@ -57,10 +50,6 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-// const handleRemoveItem = (e) => {
-//   updateList(list.filter((item) => item.id !== id));
-// };
-
 export default function Feed() {
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
@@ -83,7 +72,6 @@ export default function Feed() {
         let data = notification.request.content.data;
         setAlertList((prevState) => {
           prevState.push(data);
-          prevState.reverse();
           return [...prevState];
         });
       });
@@ -101,6 +89,11 @@ export default function Feed() {
     };
   }, []);
 
+  function handleRemove(id) {
+    setAlertList((prevState) => {
+      return prevState.filter((item) => item.id !== id);
+    });
+  }
   return (
     <View style={styles.main}>
       <TopHeader />
@@ -112,6 +105,7 @@ export default function Feed() {
           extraData={Object.values(alertList)}
           renderItem={({ item }) => (
             <AlertBox
+              removeAlert={(alertList) => handleRemove(alertList)}
               alertId={item.id}
               vImage={require("../assets/image2.png")}
               floorNo={item.floor}
