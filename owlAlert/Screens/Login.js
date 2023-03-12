@@ -12,86 +12,86 @@ import {
   Button,
   Checkbox,
   FormControl,
+  VStack, HStack, Text, Alert, Collapse
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-async function setId(id) {
+
+async function idSession(id) {
   await AsyncStorage.setItem("id", JSON.stringify(id));
-}
-
-async function login(id, password, navigation) {
-  let token = (await Notifications.getExpoPushTokenAsync()).data;
-
-  fetch("http://192.168.1.25:5000/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: id,
-      password: password,
-      token: token,
-    }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data["result"] === 1) {
-        setId(id);
-        console.log("\n HELOOOO IM HERE");
-        navigation.navigate("Alerts");
-      } else {
-      }
-    })
-    .catch((err) => console.log(err));
 }
 
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
-  const breakpoints = {
-    base: 0,
-    sm: 480,
-    md: 768,
-    lg: 992,
-    xl: 1280,
-  };
-  const fontSize = {
-    base: "md",
-    md: "lg",
-    lg: "xl",
-  };
+  const [idErrors, setIdErrors] = useState({});
+  const [passwordError, setPasswordError] = useState({});
+  const [show, setShow] = useState(false);
 
-  const [errors, setErrors] = useState({});
+  async function login(id, password, navigation) {
+    let token = (await Notifications.getExpoPushTokenAsync()).data;
+    await AsyncStorage.setItem("ip", JSON.stringify("http://10.120.1.203:5000"));
+    
+    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "")+"/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+        password: password,
+        token: token,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data["result"] === 1) {
+          idSession(id);
+          navigation.navigate("Alerts");
+        } else {
+          setShow(true)
+        }
+      })
+      .catch((err) => console.log(err));
+  }
 
-  const validate = () => {
-    validateId;
-    if (validateId === true && validatePassword === true) {
+  function validate() {
+    if (validateId() === true && validatePassword() === true) {
       login(id, password, navigation);
     }
   };
 
-  const validateId = () => {
+  function validateId() {
     let isValid = true;
     if (id === "") {
-      setErrors({
-        ...errors,
-        error: "ID is required",
+      setIdErrors({
+        id: "ID is required",
       });
       isValid = false;
+    } else {
+      setIdErrors({
+        id: "",
+      });
     }
     return isValid;
   };
 
-  const validatePassword = () => {
-    if (password === undefined) {
-      setErrors({
-        ...errors,
+
+  function validatePassword() {
+    let isValid = true;
+    if (password === "") {
+      setPasswordError({
         password: "Password is required",
       });
-      return false;
+      isValid = false;
+    } else {
+      setPasswordError({
+        password: "",
+      });
     }
+    return isValid;
   };
 
   return (
@@ -105,20 +105,33 @@ function LoginPage() {
             height={170}
             my="50px"
           />
-
           <Heading fontSize="3xl" bold>
             Login
           </Heading>
         </Center>
+        <Collapse isOpen={show}>
+          <Alert mx="auto" mt="20px" width="250px" status="error" colorScheme="error">
+            <VStack space={2} flexShrink={1} w="100%">
+              <HStack flexShrink={1} space={2} alignItems="center" justifyContent="space-between">
+                <HStack flexShrink={1} space={2} alignItems="center">
+                  <Alert.Icon />
+                  <Text fontSize="md" fontWeight="medium" color="coolGray.800">
+                    Incorrect ID or password!
+                  </Text>
+                </HStack>
+              </HStack>
+            </VStack>
+          </Alert>
+        </Collapse>
 
-        <FormControl isRequired isInvalid={"name" in errors}>
+        <FormControl isRequired isInvalid={"id" in idErrors}>
           <Center>
             <Stack alignItems="center">
-              <InputGroup w="100%" mt="60px">
+              <InputGroup w="100%" mt="30px">
                 <InputLeftAddon
                   borderLeftRadius="20"
                   borderWidth="1"
-                  borderColor="black"
+                  borderColor= "black"
                   children={"ID"}
                   w="20%"
                 />
@@ -133,15 +146,16 @@ function LoginPage() {
                   borderRightColor="#FFFFFF"
                   borderLeftWidth="0.5"
                   maxLength={4}
+                  keyboardType='number-pad'
                   onChangeText={(id) => setId(id)}
                 />
               </InputGroup>
-              <FormControl.ErrorMessage>{errors.name}</FormControl.ErrorMessage>
+              <FormControl.ErrorMessage>{idErrors.id}</FormControl.ErrorMessage>
             </Stack>
           </Center>
         </FormControl>
 
-        <FormControl isRequired isInvalid={"password" in errors}>
+        <FormControl isRequired isInvalid={"password" in passwordError}>
           <Center>
             <Stack alignItems="center">
               <InputGroup w="100%" mt="30px">
@@ -167,7 +181,7 @@ function LoginPage() {
                 />
               </InputGroup>
               <FormControl.ErrorMessage>
-                {errors.password}
+                {passwordError.password}
               </FormControl.ErrorMessage>
             </Stack>
           </Center>
@@ -178,23 +192,19 @@ function LoginPage() {
           ml="60px"
           my="60px"
           borderColor={"#808080"}
-          borderWidth="1"
-        >
+          borderWidth="1">
           Remember me
         </Checkbox>
+
         <Center>
           <Button
             size="md"
             w="230px"
             rounded="10"
             bg={"#28428C"}
-            onPress={() => login(id, password, navigation)}
-          >
+            onPress={() => validate()}>
             Login
           </Button>
-          {/* 
-          <Button size="md" w="230px" rounded="10"
-            bg={"#28428C"} onPress={validateId}>Login</Button> */}
         </Center>
       </Box>
     </NativeBaseProvider>

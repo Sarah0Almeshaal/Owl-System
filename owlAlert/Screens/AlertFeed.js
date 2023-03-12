@@ -2,13 +2,24 @@ import "react-native-gesture-handler";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import * as React from "react";
-import { StyleSheet, View, SafeAreaView, Platform, Text } from "react-native";
+import { StyleSheet, View, SafeAreaView, Platform, Text, Button } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import AlertBox from "../components/AlertBox";
 import TopHeader from "../components/TopHeader";
 import BottomHeader from "../components/BottomHeader";
 import NoAlertBox from "../components/NoAlertBox";
 import { FlatList } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+
+async function checkSession(navigation) {
+  try {
+    if (await AsyncStorage.getItem("id") === null) {
+      navigation.navigate("LoginPage")
+    }
+  } catch (error) {
+  }
+}
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -33,7 +44,6 @@ async function registerForPushNotificationsAsync() {
       return;
     }
     token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
   } else {
     alert("Must use physical device for Push Notifications");
   }
@@ -56,6 +66,11 @@ export default function Feed() {
   const notificationListener = useRef();
   const responseListener = useRef();
   const [alertList, setAlertList] = useState([]);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    checkSession(navigation)
+  }, [])
 
   const myListEmpty = () => {
     return <NoAlertBox />;

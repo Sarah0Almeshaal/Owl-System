@@ -2,12 +2,11 @@ import base64
 from flask import Flask, request, jsonify, json, session
 import mysql.connector
 import requests
-import logging
 
 
 app = Flask(__name__)
 # Detetction creates the id and saves itto database, then we use it for all requests
-count = 0;
+count = 0
 users = []
 
 try:
@@ -17,12 +16,17 @@ except Exception as e:
     print(e)
 
 
+@app.route("/test")
+def test():
+    return {"test": ["test1", "test2", "test3"]}
+
 
 @app.route('/accept',methods=['POST'])
 def handleAccept():
     try:
         content = request.json
         # add the content to database
+        
         return jsonify({"result": 1,"alertid":content.get('alertId')})
     except Exception as e:
         return jsonify({'result':-1,'messgae':e})
@@ -62,6 +66,7 @@ def getAlert():
     floor = user_json['floor']
     try:
         for user in users:
+            print(user["token"])
             sendAlert(user["token"],cam,floor)
         return jsonify({"message": "Data received successfully"})
     except Exception as e:
@@ -70,18 +75,6 @@ def getAlert():
 
 
 # -----------------------------------
-
-
-@app.route("/alertImage")
-def sendAlertImage():
-    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-   
-    alertImage = {
-        "image": encoded_string,
-    }
-    return jsonify({"alert": alertImage})
-
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -110,17 +103,6 @@ def login():
 
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
-
-
-# @app.route('/alert', methods=['POST'])
-# def getAlert():
-#     data = request.get_json()
-#     user_str = json.dumps(data)
-#     user_json = json.loads(user_str)
-#     cam = user_json['cam']
-#     floor = user_json['floor']
-#     print(cam)
-#     print(floor)
 
 @app.route("/alertImage")
 def sendAlertImage():

@@ -1,11 +1,22 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import { StyleSheet, View, Image, Platform } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Image, Text, styles } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+async function logout(navigation) {
+  navigation.navigate("LoginPage")
+  await AsyncStorage.removeItem("id")
+}
 
 export default function BottomHeader() {
+  const navigation = useNavigation();
+
   return (
     <View style={feed.headerBottom}>
-      <Image style={feed.logo} source={require("../assets/logout.png")} />
+      <TouchableOpacity onPress={() => logout(navigation)}>
+        <Image source={require("../assets/logout.png")}/>
+      </TouchableOpacity>
     </View>
   );
 }
