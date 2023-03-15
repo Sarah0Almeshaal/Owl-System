@@ -18,12 +18,17 @@ except Exception as e:
     print(e)
 
 
+@app.route("/test")
+def test():
+    return {"test": ["test1", "test2", "test3"]}
+
 
 @app.route('/accept',methods=['POST'])
 def handleAccept():
     try:
         content = request.json
         # add the content to database
+        
         return jsonify({"result": 1,"alertid":content.get('alertId')})
     except Exception as e:
         return jsonify({'result':-1,'messgae':e})
@@ -144,6 +149,16 @@ def login():
 
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
+
+@app.route("/alertImage")
+def sendAlertImage():
+    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+   
+    alertImage = {
+        "image": encoded_string,
+    }
+    return jsonify({"alert": alertImage})
 
 
 @app.route('/logout', methods=['POST'])

@@ -12,18 +12,20 @@ export default function AlertBox({
   vImage,
 }) {
   postResponse = async (type, user_id, alert_id) => {
-    // change address to same as fask
-    fetch(`http://192.168.10.119:5000/${type}`, {
-      method: "post",
-      headers: {
-        Accept: "application/json",
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user_id,
-        alertId: alert_id,
-      }),
-    })
+    fetch(
+      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + `/${type}`,
+      {
+        method: "post",
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user_id,
+          alertId: alert_id,
+        }),
+      }
+    )
       .then((response) => {
         return response.json();
       })

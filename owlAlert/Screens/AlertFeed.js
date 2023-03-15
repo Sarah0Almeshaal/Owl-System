@@ -9,41 +9,16 @@ import TopHeader from "../components/TopHeader";
 import BottomHeader from "../components/BottomHeader";
 import NoAlertBox from "../components/NoAlertBox";
 import { FlatList } from "react-native-gesture-handler";
-import * as TaskManager from "expo-task-manager";
-import { addNotificationReceivedListener } from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
-const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-TaskManager.defineTask(
-  BACKGROUND_NOTIFICATION_TASK,
-  ({ data, error, executionInfo }) => {
-    console.log("Received a notification in the background!");
-    console.log(data);
-    // Do something with the notification data
-    setAlertList((prevState) => {
-      prevState.push(data);
-      return [...prevState];
-    });
-  }
-);
-
-const registerBackgroundTaskAsync = async () => {
+async function checkSession(navigation) {
   try {
-    await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-    const registeredTasks = await TaskManager.getRegisteredTasksAsync();
-    console.log("Registered tasks:", registeredTasks);
-  } catch (e) {
-    console.warn(e);
-  }
-};
-
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: false,
-//     shouldSetBadge: false,
-//   }),
-// });
+    if ((await AsyncStorage.getItem("id")) === null) {
+      navigation.navigate("LoginPage");
+    }
+  } catch (error) {}
+}
 
 // prevent displaying notofication when app is on foreground
 Notifications.setNotificationHandler({
@@ -70,7 +45,6 @@ async function registerForPushNotificationsAsync() {
       return;
     }
     token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
   } else {
     alert("Must use physical device for Push Notifications");
   }
