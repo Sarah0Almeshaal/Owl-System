@@ -51,6 +51,9 @@ input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detecti
 # Save output video file in output_path
 output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
 
+# save frame in this path
+output_path_frames ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames"
+
 trueCount = 0  # > Violence frames count
 sendAlert = 0
 count = 0
@@ -72,7 +75,9 @@ while cam.isOpened():
         # W: width, H: height of frame img
         (H, W) = frame.shape[:2]
 
+    # capture frame for edit
     output = frame.copy()
+    clean_frame = frame.copy()
 
     # convert frame from BGR to RGB
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -115,11 +120,19 @@ while cam.isOpened():
             print("Violence Detected!!")
             # SaveVideo(output_path, W, H)
             try:
-                url = 'http://127.0.0.1:8000/alert'
-                info = {'cam':2,'floor':1}
+                # Get current date of detection
+                now = datetime.now()
+                timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+                # Handle detection's information by calling an API 
+                url = 'http://127.0.0.1:5000/alert'
+                # information about camera and its floor number and detection timestamp
+                info = {'cam':"1.1.1.1",'floor':1,'timestamp':timestamp}
                 response = requests.post(url,json = info,verify=False)
                 parsed = response.json()
                 print(parsed)
+                # store frame with alert as file name
+                if(parsed['result']==1):
+                    cv2.imwrite(os.path.join(output_path_frames,str(parsed["alertId"])+'.jpg'),clean_frame)
             except Exception as e:
                 print(e)
             sendAlert = 1

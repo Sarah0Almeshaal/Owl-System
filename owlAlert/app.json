@@ -22,7 +22,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.owlsecuritysystem.owlalert",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-remote-notification"]
+        "UIBackgroundModes": ["remote-notification", "location","fetch"]
       }
     },
     "android": {

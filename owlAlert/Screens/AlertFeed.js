@@ -9,13 +9,50 @@ import TopHeader from "../components/TopHeader";
 import BottomHeader from "../components/BottomHeader";
 import NoAlertBox from "../components/NoAlertBox";
 import { FlatList } from "react-native-gesture-handler";
+import * as TaskManager from "expo-task-manager";
+import { addNotificationReceivedListener } from "expo-notifications";
 
+const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  ({ data, error, executionInfo }) => {
+    console.log("Received a notification in the background!");
+    console.log(data);
+    // Do something with the notification data
+    setAlertList((prevState) => {
+      prevState.push(data);
+      return [...prevState];
+    });
+  }
+);
+
+const registerBackgroundTaskAsync = async () => {
+  try {
+    await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+    const registeredTasks = await TaskManager.getRegisteredTasksAsync();
+    console.log("Registered tasks:", registeredTasks);
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
+
+// prevent displaying notofication when app is on foreground
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const { origin } = notification;
+    if (origin === "selected") {
+      this.setState({ notification: notification });
+    }
+  },
 });
 
 async function registerForPushNotificationsAsync() {
@@ -78,14 +115,22 @@ export default function Feed() {
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
+        setNotification(response.notification);
         let data = response.notification.request.content.data;
+        setAlertList((prevState) => {
+          prevState.push(data);
+          return [...prevState];
+        });
       });
+
+    registerBackgroundTaskAsync();
 
     return () => {
       Notifications.removeNotificationSubscription(
         notificationListener.current
       );
       Notifications.removeNotificationSubscription(responseListener.current);
+      Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK);
     };
   }, []);
 

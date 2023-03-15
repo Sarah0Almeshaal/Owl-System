@@ -3,12 +3,13 @@ from flask import Flask, request, jsonify, json, session
 import mysql.connector
 import requests
 import time
+import os
 
 
 app = Flask(__name__)
 # Detetction creates the id and saves itto database, then we use it for all requests
-count = 0;
-users = []
+imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/"
+users = [{"id": 1015},{"id": 1185}]
 
 try:
      connection = mysql.connector.connect(host='localhost',
@@ -33,9 +34,8 @@ def handleResolve(userId,alertId):
     print("resloved--> userId:{}  alertId:{}",userId,alertId)
     return jsonify({"result": 1})
 
-def sendAlert(token,cam,floor):
-    global count
-    count += 1
+# push notification
+def sendAlert(token,cam,floor,alertId):
     message = {
         "to": token,
         "sound": 'default',
@@ -43,12 +43,13 @@ def sendAlert(token,cam,floor):
         "body": "cam: {} floor: {}".format(cam,floor),
         "data":
         {
-            "id":count,
+            "id":alertId,
             "cam": cam,
             "floor": floor,
             "pic": 1,
-            "respondents": 2
+            "respondents": 2,
         },
+        "_contentAvailable": True,
     }
     response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
     return response.content
@@ -56,31 +57,64 @@ def sendAlert(token,cam,floor):
 @app.route('/alert', methods=['POST'])
 def getAlert():
     data = request.get_json()
-    user_str = json.dumps(data)
-    user_json = json.loads(user_str)
-    cam = user_json['cam']
-    floor = user_json['floor']
+    data_str = json.dumps(data)
+    data_json = json.loads(data_str)
+    cam = data_json['cam']
+    floor = data_json['floor']
+    timestamp = data_json['timestamp']
+    # 1/ create alertRecord inserting pending status
     try:
-        for user in users:
-            sendAlert(user["token"],cam,floor)
-        return jsonify({"message": "Data received successfully"})
-    except Exception as e:
-        print(e)
-        return jsonify({"message": "----SERVER ERROR: JSON OR PUSH NOTIFICATION------"})
-
+        query = "INSERT INTO alert (Status) VALUES ('pending')"
+        cursor = connection.cursor()
+        cursor.execute(query)
+        #2/ retieve the alertRecord ID
+        alertId = cursor.lastrowid
+        if alertId != 0:
+            #3/create sendRecord inserting the retrieved alertID and Json Info 
+            try:
+                insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
+                cursor.execute(insert_data,(str(cam),str(alertId),timestamp))
+            except mysql.connector.Error as e:
+                return jsonify({"message":e.msg,"result":-1})
+            for user in users:
+                # 4/ create recieveRecord inserting userID and AlertID
+                try:
+                    insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
+                    cursor.execute(insert_data,(str(user["id"]),str(alertId)))
+                    connection.commit()
+                except mysql.connector.Error as e:
+                    return jsonify({"message":e.msg,"result":-1})
+                # 5/ push notification
+                # sendAlert(user["token"],cam,floor,alertId)
+            return jsonify({"message": "Data inserted successfully","alertId":alertId,"result": 1})
+    except mysql.connector.Error as e:
+        print("Error reading data from MySQL table", e)
+        return jsonify({"message":e.msg,"result":-1})
+    finally:
+        cursor.close()
+    
 
 # -----------------------------------
 
 
-@app.route("/alertImage")
+@app.route("/alertImage",methods=['POST'])
 def sendAlertImage():
-    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-   
-    alertImage = {
-        "image": encoded_string,
-    }
-    return jsonify({"alert": alertImage})
+    data = request.get_json()
+    data_str = json.dumps(data)
+    data_json = json.loads(data_str)
+    # alert Id in integer; used for finding the image file name 
+    alertId = data_json['alertId']
+    try:
+        for root, dirs, files in os.walk(imageDirectory):
+            for file in files:
+                if(int(file.replace(".jpg",""))==alertId):
+                    # already found the file name === the alert ID
+                    with open(os.path.join(imageDirectory,file), "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    alertImage = {"image": encoded_string,}
+                    return jsonify(alertImage)
+    except Exception as e:
+        return jsonify({"msg": 'eror'})
 
 
 @app.route('/login', methods=['POST'])

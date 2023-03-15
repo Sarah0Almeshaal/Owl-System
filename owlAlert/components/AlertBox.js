@@ -12,7 +12,8 @@ export default function AlertBox({
   vImage,
 }) {
   postResponse = async (type, user_id, alert_id) => {
-    fetch(`http://192.168.1.25:5000/${type}`, {
+    // change address to same as fask
+    fetch(`http://192.168.10.119:5000/${type}`, {
       method: "post",
       headers: {
         Accept: "application/json",
