@@ -1,18 +1,7 @@
 import { React, useState } from "react";
 import {
-  NativeBaseProvider,
-  Box,
-  Center,
-  Image,
-  Stack,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  Heading,
-  Button,
-  Checkbox,
-  FormControl,
-  VStack, HStack, Text, Alert, Collapse
+  NativeBaseProvider, Box, Center, Image, Stack, Input, InputGroup, InputLeftAddon, Heading, Button,
+  Checkbox, FormControl, VStack, HStack, Text, Alert, Collapse, WarningOutlineIcon
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
@@ -33,8 +22,8 @@ function LoginPage() {
   async function login(id, password, navigation) {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
     await AsyncStorage.setItem("ip", JSON.stringify("http://10.120.1.203:5000"));
-    
-    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "")+"/login", {
+
+    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,9 +36,12 @@ function LoginPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data["result"] === 1) {
+        if (data["result"] === "Security Guard") {
           idSession(id);
           navigation.navigate("Alerts");
+        } else if (data["result"] === "Admin") {
+          idSession(id);
+          navigation.navigate("MainScreen");
         } else {
           setShow(true)
         }
@@ -58,7 +50,8 @@ function LoginPage() {
   }
 
   function validate() {
-    if (validateId() === true && validatePassword() === true) {
+    if (validateId() === true) {
+      setShow(false)
       login(id, password, navigation);
     }
   };
@@ -75,12 +68,6 @@ function LoginPage() {
         id: "",
       });
     }
-    return isValid;
-  };
-
-
-  function validatePassword() {
-    let isValid = true;
     if (password === "") {
       setPasswordError({
         password: "Password is required",
@@ -104,13 +91,14 @@ function LoginPage() {
             width={170}
             height={170}
             my="50px"
+            mb={"0"}
           />
           <Heading fontSize="3xl" bold>
             Login
           </Heading>
         </Center>
         <Collapse isOpen={show}>
-          <Alert mx="auto" mt="20px" width="250px" status="error" colorScheme="error">
+          <Alert mx="auto" mt="20px" width="290px" status="error" colorScheme="error">
             <VStack space={2} flexShrink={1} w="100%">
               <HStack flexShrink={1} space={2} alignItems="center" justifyContent="space-between">
                 <HStack flexShrink={1} space={2} alignItems="center">
@@ -125,53 +113,52 @@ function LoginPage() {
         </Collapse>
 
         <FormControl isRequired isInvalid={"id" in idErrors}>
-          <Center>
-            <Stack alignItems="center">
-              <InputGroup w="100%" mt="30px">
-                <InputLeftAddon
-                  borderLeftRadius="20"
-                  borderWidth="1"
-                  borderColor= "black"
-                  children={"ID"}
-                  w="20%"
-                />
+          <Stack alignItems="center">
+            <InputGroup mt="30px">
+              <InputLeftAddon
+                borderLeftRadius="20"
+                borderWidth="1"
+                borderColor="black"
+                children={"ID"}
+                w="100px"
+                fontSize="12"
+              />
 
-                <Input
-                  w="60%"
-                  placeholder="Enter your ID"
-                  borderWidth="1"
-                  fontSize="md"
-                  variant="rounded"
-                  borderColor="black"
-                  borderRightColor="#FFFFFF"
-                  borderLeftWidth="0.5"
-                  maxLength={4}
-                  keyboardType='number-pad'
-                  onChangeText={(id) => setId(id)}
-                />
-              </InputGroup>
-              <FormControl.ErrorMessage>{idErrors.id}</FormControl.ErrorMessage>
-            </Stack>
-          </Center>
+              <Input
+                w="200px"
+                placeholder="Enter your ID"
+                borderWidth="1"
+                fontSize="12"
+                variant="rounded"
+                borderColor="black"
+                borderLeftWidth="0.5"
+                maxLength={4}
+                keyboardType='number-pad'
+                onChangeText={(id) => setId(id)}
+              />
+            </InputGroup>
+            <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>{idErrors.id}</FormControl.ErrorMessage>
+          </Stack>
         </FormControl>
 
         <FormControl isRequired isInvalid={"password" in passwordError}>
           <Center>
             <Stack alignItems="center">
-              <InputGroup w="100%" mt="30px">
+              <InputGroup w="80%" mt="30px">
                 <InputLeftAddon
                   borderLeftRadius="20"
                   borderWidth="1"
                   borderColor="black"
                   children={"Password"}
-                  w="20%"
+                  w="100px"
+                  fontSize="12"
                 />
 
                 <Input
-                  w="60%"
+                  w="200px"
                   placeholder="********"
                   borderWidth="1"
-                  fontSize="md"
+                  fontSize="12"
                   variant="rounded"
                   borderColor="black"
                   placeholderTextColor="blue"
@@ -180,7 +167,7 @@ function LoginPage() {
                   onChangeText={(password) => setPassword(password)}
                 />
               </InputGroup>
-              <FormControl.ErrorMessage>
+              <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
                 {passwordError.password}
               </FormControl.ErrorMessage>
             </Stack>
@@ -192,7 +179,8 @@ function LoginPage() {
           ml="60px"
           my="60px"
           borderColor={"#808080"}
-          borderWidth="1">
+          borderWidth="1"
+        >
           Remember me
         </Checkbox>
 
