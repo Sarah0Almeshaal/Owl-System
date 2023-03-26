@@ -6,9 +6,8 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import CameraList from "./DemoCamList";
-
-export default function CameraSC() {
+import CameraList from "../Admin Components/CameraList";
+function CameraSC() {
   const [active, setActive] = useState("CameraList");
   return (
     <SafeAreaView>
@@ -30,7 +29,7 @@ export default function CameraSC() {
     </SafeAreaView>
   );
 }
-// export default CameraSC;
+export default CameraSC;
 const styles = StyleSheet.create({
   container: {
     margin: 20,

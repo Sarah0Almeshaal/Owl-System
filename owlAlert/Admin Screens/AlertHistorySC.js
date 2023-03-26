@@ -1,12 +1,6 @@
 import React, { useState } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-} from "react-native";
-import AlertLog from "../Admin Screens/AlertLog";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import AlertLog from "../Admin Components/AlertLog";
 
 function AlertHistorySC() {
   const [active, setActive] = useState("AlertLog");
@@ -53,24 +47,5 @@ const styles = StyleSheet.create({
     borderRadius: "5px",
     shadowOpacity: 0.2,
     shadowOffset: { width: 1, height: 4 },
-  },
-  title: {
-    textAlign: "left",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  button: {
-    padding: 8,
-    borderRadius: 4,
-    backgroundColor: "steelblue",
-    marginLeft: 70,
-  },
-  buttonText: {
-    textAlign: "center",
-    color: "white",
   },
 });
