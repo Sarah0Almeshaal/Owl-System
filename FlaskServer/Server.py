@@ -2,8 +2,6 @@ import base64
 from flask import Flask, request, jsonify, json
 import mysql.connector
 import requests
-from datetime import datetime
-
 
 app = Flask(__name__)
 # Detetction creates the id and saves itto database, then we use it for all requests
@@ -135,14 +133,14 @@ def logout():
 @app.route('/addCamera', methods=['POST'])
 def addCamera():
     content = request.json
-    cameraNum = content.get("cameraNo")
+    cameraNum = content.get("cameraNum")
     cameraIp = content.get("cameraIp")
     cameraFloor = content.get("cameraFloor")
     adminId = content.get("adminId")
     try:
         sqlQuery = "INSERT INTO Camera (Id, CamIP, floor, user_Id) VALUES (%s, %s, %s, %s)"
         cursor = connection.cursor()
-        cursor.execute(sqlQuery, (str(cameraNum), str(
+        cursor.execute(sqlQuery, (int(cameraNum), str(
             cameraIp), str(cameraFloor), str(adminId)))
         connection.commit()
         return jsonify({"result": 1})
@@ -151,23 +149,38 @@ def addCamera():
         return jsonify({"result": -1})
 
 
-@app.route('/getAlertCount', methods=['GET'])
-def getAlertCount():
+@app.route('/getAlerts', methods=['GET'])
+def getAlerts():
     try:
         sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         alerts = cursor.fetchall()
         alertList = []
+
+        sqlQueryResolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'resolved' AND DATE(timestamp) = curdate();"
+        cursor.execute(sqlQueryResolved)
+        resolved = cursor.fetchone()
+
+        sqlQueryUnresolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'unresolved' AND DATE(timestamp) = curdate();"
+        cursor.execute(sqlQueryUnresolved)
+        unresolved = cursor.fetchone()
+
         if cursor.rowcount > 0:
+            counter = {
+                "resolved": resolved[1],
+                "unresolved": unresolved[1]
+            }
+
             for alert in alerts:
                 date = alert[0].strftime('%Y-%m-%d')
                 alertDetails = {
-                    "Date": date,
-                    "Counter": alert[1],
+                    "date": date,
+                    "count": alert[1],
                 }
+
                 alertList.append(alertDetails)
-            return jsonify({"alerts": alertList})
+            return jsonify({"alerts": alertList}, {"counter": counter})
         else:
             return jsonify({"alerts": 0})
     except mysql.connector.Error as e:
@@ -190,7 +203,7 @@ def deleteCamera():
         return jsonify({"result": -1})
 
 
-@app.route('/getData', methods=['GET'])
+@app.route('/getCamerasData', methods=['GET'])
 def getData():
     try:
         sqlQuery = "SELECT id, floor FROM CAMERA"
@@ -211,6 +224,86 @@ def getData():
     except mysql.connector.Error as e:
         print("Error retrieving data into MySQL table", e)
         return jsonify({"result": -1})
+
+
+@app.route('/getAlertLog', methods=['GET'])
+def getAlertLogData():
+    try:
+        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp  FROM alert, send WHERE alert.id = send.alertID"
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery)
+        AlertLogRecords = cursor.fetchall()
+        AlertLog = []
+        if cursor.rowcount > 0:
+            for record in AlertLogRecords:
+                date = record[2].strftime('%Y-%m-%d')
+                time = record[2].strftime("%H:%M:%S")
+               
+                log = {
+                    "id": record[0],
+                    "status": record[1],
+                    "date": date,
+                    "time": time
+                }
+                AlertLog.append(log)
+            return jsonify({"AlertLog": AlertLog})
+        else:
+            return jsonify({"AlertLog": 0})
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
+
+@app.route('/alertDetails', methods=['GET'])
+def alertDetails():
+    try:
+        # content = request.json
+        # alertId = content.get("alertId")
+
+        # alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = %s ;"""
+        # cursor = connection.cursor()
+        # cursor.execute(alertDetailsQuery, (alertId,))
+        # details = cursor.fetchone()
+
+        # respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = %s ;"""
+        # cursor.execute(respondentsDetailsQuery, (alertId,))
+        # respondentRecord = cursor.fetchall()
+        # respondents = []
+
+        alertDetailsQuery = "SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = 33;"
+        cursor = connection.cursor()
+        cursor.execute(alertDetailsQuery)
+        details = cursor.fetchone()
+
+        respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = 33 ;"""
+        cursor.execute(respondentsDetailsQuery)
+        respondentRecord = cursor.fetchall()
+        respondents = []
+
+        if cursor.rowcount > 0:
+            date = details[2].strftime('%Y-%m-%d')
+            time = details[2].strftime("%H:%M:%S")
+            alertDetails = {
+                "status": details[1],
+                "date": date,
+                "time": time,
+                "camId": details[3],
+                "floor": details[4]
+            }
+
+            for record in respondentRecord:
+                respondent = {
+                    "id": record[0],
+                    "fname": record[1],
+                    "lname": record[2]
+                }
+                respondents.append(respondent)
+            
+        return jsonify({"alertDetails": alertDetails}, {"respondents": respondents})
+
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

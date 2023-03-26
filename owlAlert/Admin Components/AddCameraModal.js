@@ -1,9 +1,11 @@
-import { React, useState } from "react";
-import { Button, Center, Modal, FormControl, Input, Heading, Box, Select, Collapse, Alert, VStack, HStack, Text, WarningOutlineIcon } from "native-base";
+import { React, useState, useEffect } from "react";
+import { Button, Center, Modal, FormControl, Input, Heading, Box, Select, Collapse, 
+Alert, VStack, HStack, Text, WarningOutlineIcon } from "native-base";
 import { Divider } from '@rneui/themed';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function AddCamera(cameraNum) {
+
+const AddCamera = props => {
     const [showModal, setShowModal] = useState(false);
     const [floor, setFloor] = useState("");
     const [ip, setIP] = useState("");
@@ -11,8 +13,7 @@ export default function AddCamera(cameraNum) {
     const [floorError, setFloorErrors] = useState({});
     const [ipError, setIpErrors] = useState({});
 
-    cameraNum = 5
-    let cameraInfo = { cameraNum: cameraNum, cameraFloor: floor, cameraIp: ip };
+    let cameraInfo = { cameraNum: props.cameraNum, cameraFloor: floor, cameraIp: ip };
 
     async function addCamera(cameraInfo) {
         fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/addCamera", {
@@ -31,7 +32,7 @@ export default function AddCamera(cameraNum) {
             .then((data) => {
                 if (data["result"] === 1) {
                     setShowModal(false)
-                    setShowAlert(false)
+                    setShowAlert(false)                    
                 } else {
                     console.log("ERROR")
                     setShowAlert(true)
@@ -80,14 +81,14 @@ export default function AddCamera(cameraNum) {
 
     return (
         <Center>
-            <Button onPress={() => show()}>Button</Button>
+            <Button onPress={() => show()}>Add Camera</Button>
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <Modal.Content maxWidth="400px">
                     <Modal.CloseButton />
                     <Modal.Header borderBottomWidth={"0"}>
                         Add Camera
                         <Divider style={{ width: "15%", marginTop: 5 }} width={"2"} color="#0785F9" inset={true} insetType="right" />
-                        <Heading size="xs" top="5" fontWeight={"normal"}>Camera #{cameraNum}</Heading>
+                        <Heading size="xs" top="5" fontWeight={"normal"}>Camera #{props.cameraNum}</Heading>
                         <Collapse isOpen={showAlert}>
                             <Alert mx="auto" mt="20px" width="250px" status="error" colorScheme="error">
                                 <VStack space={5} flexShrink={1} w="100%">
@@ -141,3 +142,4 @@ export default function AddCamera(cameraNum) {
         </Center>
     );
 }
+  export default AddCamera;

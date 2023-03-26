@@ -1,4 +1,4 @@
-import { React } from "react";
+import { React, useState, useEffect } from "react";
 import { NativeBaseProvider, Heading, HStack, VStack, Box, Image, Text, Button, Center } from "native-base";
 import { TouchableOpacity, StyleSheet } from "react-native"
 import BottomBar from "../Admin Components/BottomBar";
@@ -22,108 +22,47 @@ async function checkSession(navigation) {
     }
 }
 
-// ------------------------------------------ ideas: Use hooks (useEffect then useState) ------------------------------------------
-  
-
-// async function checkUserHosting() {
-//     return fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/getAlertCount")
-//         .then((response) => {
-//             return response.json().then((data) => {
-//                 // console.log("data");
-//                 // console.log(data);
-//                 return data;
-//             }).catch((err) => {
-//                 console.log(err);
-//             })
-//         });
-// }
-
-
-// checkUserHosting().then((data) => {
-//     // console.log(data)
-//     printF(data)
-// });
-
-// let x 
-// function printF(data) {
-//     return new Promise((resolve, reject) =>
-//       setTimeout(() => resolve(x = data), 1000)
-//     );
-//   }
-//   printF(x).then(res => console.log(x));
-
-
-async function getCameraList() {
-
-    return fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/getData",
-        {
-            method: "GET",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data["cameraList"] != 0) {
-                // console.log(data["alerts"])
-                // for (let i = 0; i < data["alerts"].length; i++) {
-                //     for (let alert in data) {
-                //         alertDetails = {
-                //             "date": data[alert][i]["Date"],
-                //             "count": data[alert][i]["Counter"],
-                //         }
-                //     } alertList[i] = alertDetails
-                // }
-                // return alertList;
-            } else if (data["alerts"] === 0) {
-                //view now staticts 
-                console.log("0")
-            }
-            else if (data["result"] === -1) {
-                console.log("ERROR")
-            }
-        })
-        .catch(error => console.warn(error));
-}
-
-getAlertCount()
-// getAlertCount().then(response => console.log(response));
-
-// getAlertCount().then(response => console.log(response));
-// console.log("after call")
-
-// var listt = getAlertCount()
-
-
-// print the contents of the fruits list
-
-export default function MainScreen(resolved, unresolved) {
+export default function MainScreen() {
     const navigation = useNavigation();
     checkSession(navigation)
     const screenWidth = Dimensions.get("window").width;
+    const [alerts, setAlerts] = useState([]);
+    const [resolved, setResolved] = useState(0);
+    const [unresolved, setUnresolved] = useState(0);
 
-    const commitsData = [
-        { date: "2023-03-15", count: 1 },
-        { date: "2023-03-17", count: 2 },
-    ];
+    let alertList = [];
+    let alertDetails
+    useEffect(() => {
+        fetch("http://10.120.1.203:5000/getAlerts")
+            .then(res => res.json())
+            .then((data) => {
+                if (data["alerts"] != 0) {
+                    for (let i = 0; i < data[0]["alerts"].length; i++) {
+                            alertDetails = {
+                                "date": data[0]["alerts"][i]["date"],
+                                "count": data[0]["alerts"][i]["count"],
+                            }
+                        alertList[i] = alertDetails
+                    }
+                    setAlerts(alertList);
+                } else if (data["alerts"] === 0) {
+                    //view now staticts 
+                }
+                else if (data["result"] === -1) {
+                    console.log("ERROR")
+                } 
+                if (data["counter"] != -1) {
+                    setResolved(data[1]["counter"]["resolved"]);
+                    setUnresolved(data[1]["counter"]["unresolved"]);
+                }
+                else if (data["result"] === -1) {
+                    console.log("ERROR")
+                }
 
-    // console.log("commitsData")
-    // for (let i = 0; i < commitsData.length; i++) {
-    //     for (let alert in commitsData) {
-    //         console.log(commitsData[alert]["date"] + " " + commitsData[alert]["count"])
-    //     }
-    // }
-    // console.log("----------------------------------------")
-
-    // console.log("alertList")
-    // for (let i = 0; i < alertList.length; i++) {
-    //     for (let alert in alertList) {
-    //         console.log("list " +  list[1]["count"])
-    //     }
-    // }
-    // console.log("----------------------------------------")
-
+            }).catch((error) => {
+                console.error(error);
+            });
+    }, [])
 
     const chartConfig = {
         backgroundGradientFrom: "#FFFFFF",
@@ -135,9 +74,6 @@ export default function MainScreen(resolved, unresolved) {
     };
     let todayDate = new Date()
     todayDate = todayDate.toISOString().split('T')[0]
-
-    resolved = 12
-    unresolved = 5
 
     return (
         <NativeBaseProvider>
@@ -170,7 +106,7 @@ export default function MainScreen(resolved, unresolved) {
                 </HStack>
                 <Center>
                     <ContributionGraph
-                        values={commitsData}
+                        values={alerts}
                         endDate={new Date(todayDate)}
                         numDays={105}
                         width={screenWidth}
@@ -182,7 +118,6 @@ export default function MainScreen(resolved, unresolved) {
             </VStack>
             <BottomBar />
         </NativeBaseProvider>
-
     );
 }
 

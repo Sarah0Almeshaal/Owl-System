@@ -2,12 +2,13 @@ import { React, useState, useRef } from "react";
 import { Text, Button, Center, AlertDialog, Collapse, Alert, VStack, HStack } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function DeleteCameraDialog(cameraNum) {
+
+const DeleteCameraDialog = props => {
     const [isOpen, setIsOpen] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const onClose = () => setIsOpen(false);
     const cancelRef = useRef(null);
-    cameraNum = 5
+    let cameraNum = props.cameraNum
 
     async function deleteCamera(cameraNum) {
         fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/deleteCamera", {
@@ -62,7 +63,7 @@ export default function DeleteCameraDialog(cameraNum) {
                             </Alert>
                         </Collapse>
                         <Text textAlign="center" fontSize="12">
-                            This will remove all data relating to camera {cameraNum}.
+                            This will remove all data relating to camera {props.cameraNum}.
                         </Text>
                         <Text textAlign="center" fontSize="12">
                             This action cannot be reversed.
@@ -73,7 +74,7 @@ export default function DeleteCameraDialog(cameraNum) {
                             <Button variant="unstyled" colorScheme="coolGray" onPress={onClose} ref={cancelRef}>
                                 Cancel
                             </Button>
-                            <Button colorScheme="danger" onPress={() => deleteCamera(cameraNum)}>
+                            <Button colorScheme="danger" onPress={() => deleteCamera(props.cameraNum)}>
                                 Delete
                             </Button>
                         </Button.Group>
@@ -83,3 +84,5 @@ export default function DeleteCameraDialog(cameraNum) {
         </Center>
     );
 }
+
+export default DeleteCameraDialog;
