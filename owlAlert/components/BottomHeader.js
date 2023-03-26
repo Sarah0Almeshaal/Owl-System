@@ -1,6 +1,6 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import { StyleSheet, View, TouchableOpacity, Image, Text, styles } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 

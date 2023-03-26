@@ -1,5 +1,5 @@
 import base64
-from flask import Flask, request, jsonify, json, session
+from flask import Flask, request, jsonify, json
 import mysql.connector
 import requests
 import time
@@ -17,8 +17,8 @@ numberOfAccept = int(len(users)/2)
 imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/"
 
 try:
-     connection = mysql.connector.connect(host='localhost',
-     database='owlsys', user='owlsys', password='admin')
+    connection = mysql.connector.connect(host='localhost',
+                                         database='owlsys', user='owlsys', password='admin')
 except Exception as e:
     print(e)
 
@@ -134,7 +134,7 @@ def handleAccept():
             return jsonify({"message":e.msg,"result":-1})
         return jsonify({"result": 1,"alertId":alertId,"userId":userId})
     except Exception as e:
-        return jsonify({'result':-1,'messgae':e})
+        return jsonify({'result': -1, 'messgae': e})
 
 
 # push notification
@@ -146,8 +146,10 @@ def sendPushNotification(token,cam,floor):
         "body": "cam: {} floor: {}".format(cam,floor),
         "_contentAvailable": True,
     }
-    response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
+    response = requests.post(
+        'https://exp.host/--/api/v2/push/send', json=message)
     return response.content
+
 
 @app.route('/alert', methods=['POST'])
 def getAlert():
@@ -208,20 +210,22 @@ def login():
     password = user_json['password']
     token = user_json['token']
     try:
-        sql_select_Query = "SELECT * FROM user where  Password='" + \
+        sqlQuery = "SELECT id, password, type FROM user where  Password='" + \
             password + "' and id = " + str(id)
 
         cursor = connection.cursor()
-        cursor.execute(sql_select_Query)
-        cursor.fetchall()
-        # store logged in users into a list for future sent alerts
+        cursor.execute(sqlQuery)
+        userType = cursor.fetchone()
         if cursor.rowcount > 0:
-            user = {
-                "id": id,
-                "token": token
-            }
-            users.append(user)
-            return jsonify({"result": 1})
+            if userType[2] == "Admin":
+                return jsonify({"result": "Admin"})
+            else:
+                user = {
+                    "id": id,
+                    "token": token
+                }
+                users.append(user)
+            return jsonify({"result": "Security Guard"})
         else:
             return jsonify({"result": -1})
 
@@ -240,6 +244,87 @@ def logout():
             return jsonify({"result": 1})
         else:
             return jsonify({"result": -1})
+
+
+@app.route('/addCamera', methods=['POST'])
+def addCamera():
+    content = request.json
+    cameraNum = content.get("cameraNo")
+    cameraIp = content.get("cameraIp")
+    cameraFloor = content.get("cameraFloor")
+    adminId = content.get("adminId")
+    try:
+        sqlQuery = "INSERT INTO Camera (Id, CamIP, floor, user_Id) VALUES (%s, %s, %s, %s)"
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery, (str(cameraNum), str(
+            cameraIp), str(cameraFloor), str(adminId)))
+        connection.commit()
+        return jsonify({"result": 1})
+    except mysql.connector.Error as e:
+        print("Error inserting data into MySQL table", e)
+        return jsonify({"result": -1})
+
+
+@app.route('/getAlertCount', methods=['GET'])
+def getAlertCount():
+    try:
+        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery)
+        alerts = cursor.fetchall()
+        alertList = []
+        if cursor.rowcount > 0:
+            for alert in alerts:
+                date = alert[0].strftime('%Y-%m-%d')
+                alertDetails = {
+                    "Date": date,
+                    "Counter": alert[1],
+                }
+                alertList.append(alertDetails)
+            return jsonify({"alerts": alertList})
+        else:
+            return jsonify({"alerts": 0})
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
+
+
+@app.route('/deleteCamera', methods=['POST'])
+def deleteCamera():
+    content = request.json
+    cameraNum = content.get("cameraNum")
+    try:
+        sqlQuery = """Delete from Camera where Id = %s"""
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery, (cameraNum,))
+        connection.commit()
+        return jsonify({"result": 1})
+    except mysql.connector.Error as e:
+        print("Error deleting data into MySQL table", e)
+        return jsonify({"result": -1})
+
+
+@app.route('/getData', methods=['GET'])
+def getData():
+    try:
+        sqlQuery = "SELECT id, floor FROM CAMERA"
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery)
+        camerasRecords = cursor.fetchall()
+        cameraList = []
+        if cursor.rowcount > 0:
+            for record in camerasRecords:
+                camera = {
+                    "id": record[0],
+                    "floor": record[1]
+                }
+                cameraList.append(camera)
+            return jsonify({"cameraList": cameraList})
+        else:
+            return jsonify({"cameraList": 0})
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
