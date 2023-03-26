@@ -4,12 +4,17 @@ import mysql.connector
 import requests
 import time
 import os
-
+import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-# Detetction creates the id and saves itto database, then we use it for all requests
+users = []
+alerts = []
+unresolvedTimeInMinutes = 5
+# average Number of users
+numberOfAccept = int(len(users)/2)
+# store all images captured with its alert ids
 imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/"
-users = [{"id": 1015},{"id": 1185}]
 
 try:
      connection = mysql.connector.connect(host='localhost',
@@ -18,42 +23,127 @@ except Exception as e:
     print(e)
 
 
-@app.route("/test")
-def test():
-    return {"test": ["test1", "test2", "test3"]}
+def isUnresolved(timestamp):
+    # convert string timestamp to datetime object and compare if specific time has passed
+    f = '%Y-%m-%d %H:%M:%S'
+    # increment timestamp by the specified timer
+    t = datetime.strptime(timestamp, f) + timedelta(minutes=unresolvedTimeInMinutes)
+    n = datetime.now()
+    return t<n
+
+def isResolved(alertId):
+    id = -1
+    # loop through alerts to find alertId
+    for alert in alerts:
+        if alert["id"] == alertId:
+            # increment counter by 1
+            alert["count"]+=1
+            # check if counter equals to specified number (considered resolved)
+            if alert["count"]>=numberOfAccept:
+                id = alert["id"]
+                # remove alert from alert array
+                alerts.remove(alert)
+                break
+    if id!=-1:
+        # update alert table alert.status = reolved
+        query = "UPDATE alert SET Status = 'Resolved' WHERE alert.ID = %s;"
+        cursor = connection.cursor()
+        cursor.execute(query,(str(id)))
+        connection.commit()
+
+def checkAlertStatus():
+    # setInterval every (unresolvedTimeInMinutes)
+    # loop through array
+    for a in alerts:
+        # check for each alert the timestamp call isUnresolved
+        if not isUnresolved(a["time"]):
+        # change alert status to = unresolved
+            query = "UPDATE alert SET Status = 'Unresolved' WHERE alert.ID = %s;"
+            cursor = connection.cursor()
+            cursor.execute(query,(str(a["id"])))
+            # remove alert from array
+            alerts.remove(a)
+    connection.commit()
+
+
+
+@app.route('/getAlerts',methods=['POST'])
+def getAlerts():
+    content = request.json
+    userId = content.get('userId')
+    # get alerts with a pending status
+    try:
+        select_data = ( "SELECT alert.ID as alertId, camera.Id as camId, camera.floor "
+                        "FROM alert "
+                        "INNER JOIN send ON alert.ID=send.alertID "
+                        "INNER JOIN camera ON send.camIP=camera.camIP "
+                        "WHERE alert.Status = 'pending';")
+        cursor = connection.cursor()
+        cursor.execute(select_data)
+        records = cursor.fetchall()
+        alertList=[]
+        for row in records:
+            item = {}
+            item["alertId"] = row[0]
+            item["camId"] = row[1]
+            item["floor"] = row[2]
+            # check if user already Accepted the alert
+            query= ("SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;")
+            cursor.execute(query,(str(userId),str(item["alertId"])))
+            records = cursor.fetchall()
+            isUserAccepted = records[0][0]   
+            if isUserAccepted == 0:                   
+                # Respondents
+                query= ("SELECT count(*) "
+                            "FROM receive " 
+                            "WHERE receive.alertID = %s;")
+                cursor.execute(query,(str(item["alertId"]),))
+                records = cursor.fetchall()
+                responsCount = records[0][0]
+                item["respondents"] = responsCount
+                # get image as string and store encoded image
+                alertImage = getAlertImage(item["alertId"])
+                item["alertImage"] = alertImage
+                #append dictionary to the list
+                alertList.append(item)
+        jsonString = json.dumps(alertList)
+        return jsonify({"alertList":jsonString,"result":1})
+    
+    except Exception as e:
+        return jsonify({"message":e,"result":-1})
 
 
 @app.route('/accept',methods=['POST'])
 def handleAccept():
     try:
+        # get userID and alertID
         content = request.json
-        # add the content to database
-        
-        return jsonify({"result": 1,"alertid":content.get('alertId')})
+        alertId = content.get('alertId')
+        userId = content.get('userId')
+        # create recieveRecord inserting userID and AlertID
+        try:
+            insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
+            cursor = connection.cursor()
+            cursor.execute(insert_data,(str(userId),str(alertId)))
+            connection.commit()
+            # ------------>>>>>>>>Incomplete Task------------------
+            # change alert status depending on How many Accept needed for it to change
+            # get count of users Accepted the alert
+            # If >= specified amount then change Alert Status to Resolved!!!
+        except mysql.connector.Error as e:
+            return jsonify({"message":e.msg,"result":-1})
+        return jsonify({"result": 1,"alertId":alertId,"userId":userId})
     except Exception as e:
         return jsonify({'result':-1,'messgae':e})
 
 
-@app.route('/resolve',methods=['POST'])
-def handleResolve(userId,alertId):
-    print("resloved--> userId:{}  alertId:{}",userId,alertId)
-    return jsonify({"result": 1})
-
 # push notification
-def sendAlert(token,cam,floor,alertId):
+def sendPushNotification(token,cam,floor):
     message = {
         "to": token,
         "sound": 'default',
         "title": 'Violenece Detected',
         "body": "cam: {} floor: {}".format(cam,floor),
-        "data":
-        {
-            "id":alertId,
-            "cam": cam,
-            "floor": floor,
-            "pic": 1,
-            "respondents": 2,
-        },
         "_contentAvailable": True,
     }
     response = requests.post('https://exp.host/--/api/v2/push/send', json=message)
@@ -75,22 +165,18 @@ def getAlert():
         #2/ retieve the alertRecord ID
         alertId = cursor.lastrowid
         if alertId != 0:
+            # append alert info to Alerts array --> to check for resolved/unresolved later on
+            # alerts.append({"id":alertId,"time":timestamp,"count":0})
             #3/create sendRecord inserting the retrieved alertID and Json Info 
             try:
                 insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
                 cursor.execute(insert_data,(str(cam),str(alertId),timestamp))
+                connection.commit()
             except mysql.connector.Error as e:
                 return jsonify({"message":e.msg,"result":-1})
             for user in users:
-                # 4/ create recieveRecord inserting userID and AlertID
-                try:
-                    insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
-                    cursor.execute(insert_data,(str(user["id"]),str(alertId)))
-                    connection.commit()
-                except mysql.connector.Error as e:
-                    return jsonify({"message":e.msg,"result":-1})
-                # 5/ push notification
-                # sendAlert(user["token"],cam,floor,alertId)
+                # 4/ push notification
+                sendPushNotification(user["token"],cam,floor)
             return jsonify({"message": "Data inserted successfully","alertId":alertId,"result": 1})
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
@@ -99,16 +185,7 @@ def getAlert():
         cursor.close()
     
 
-# -----------------------------------
-
-
-@app.route("/alertImage",methods=['POST'])
-def sendAlertImage():
-    data = request.get_json()
-    data_str = json.dumps(data)
-    data_json = json.loads(data_str)
-    # alert Id in integer; used for finding the image file name 
-    alertId = data_json['alertId']
+def getAlertImage(alertId):
     try:
         for root, dirs, files in os.walk(imageDirectory):
             for file in files:
@@ -116,11 +193,11 @@ def sendAlertImage():
                     # already found the file name === the alert ID
                     with open(os.path.join(imageDirectory,file), "rb") as image_file:
                         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                    alertImage = {"image": encoded_string,}
-                    return jsonify(alertImage)
+                    return encoded_string
     except Exception as e:
-        return jsonify({"msg": 'eror'})
+        return e
 
+# -----------------------------------
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -137,6 +214,7 @@ def login():
         cursor = connection.cursor()
         cursor.execute(sql_select_Query)
         cursor.fetchall()
+        # store logged in users into a list for future sent alerts
         if cursor.rowcount > 0:
             user = {
                 "id": id,
@@ -149,17 +227,6 @@ def login():
 
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
-
-@app.route("/alertImage")
-def sendAlertImage():
-    with open("C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/owlsys-logo.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-   
-    alertImage = {
-        "image": encoded_string,
-    }
-    return jsonify({"alert": alertImage})
-
 
 @app.route('/logout', methods=['POST'])
 def logout():

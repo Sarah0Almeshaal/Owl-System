@@ -1,5 +1,6 @@
 import * as React from "react";
 import { StyleSheet, Text, View, Image, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import AcceptButton from "./AcceptButton";
 import ResolvedButton from "./ResolvedButton";
 
@@ -10,6 +11,7 @@ export default function AlertBox({
   CamNo,
   ResNo,
   vImage,
+  userId,
 }) {
   postResponse = async (type, user_id, alert_id) => {
     fetch(
@@ -51,9 +53,12 @@ export default function AlertBox({
           <Text style={styles.dataStyle}>ID: {alertId}</Text>
           <Text style={styles.dataStyle}>Floor No: {floorNo}</Text>
           <Text style={styles.dataStyle}>Camera No: {CamNo}</Text>
-          <Text style={styles.dataStyle}>Responds No:{1}</Text>
+          <Text style={styles.dataStyle}>Responds No:{ResNo}</Text>
         </View>
-        <Image style={styles.AlertImage} source={vImage} />
+        <Image
+          style={styles.AlertImage}
+          source={{ uri: `data:image/jpg;base64,${vImage}` }}
+        />
       </View>
       <View style={styles.row2}>
         <ResolvedButton
@@ -63,14 +68,13 @@ export default function AlertBox({
         />
         <AcceptButton
           onPress={() => {
-            postResponse("accept", 1, alertId);
+            postResponse("accept", userId, alertId);
           }}
         />
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   alert: {
     backgroundColor: "rgba(249, 182, 82, 0.75)",
@@ -103,6 +107,8 @@ const styles = StyleSheet.create({
   alertLogo: {},
   AlertImage: {
     alignSelf: "center",
+    width: 125,
+    height: 130,
   },
   row2: {
     flexDirection: "row",

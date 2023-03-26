@@ -23,7 +23,6 @@ db.close()
 
 ##################### < Print Date and Time Method > ######################
 
-
 def getDateTime():
     localTime = datetime.now()
     Time = "Local Time:", localTime.strftime("%m/%d/%Y, %H:%M:%S")
@@ -103,7 +102,6 @@ while cam.isOpened():
     if label:
         text_color = (0, 0, 255)
         trueCount += 1
-
     else:
         text_color = (0, 255, 0)
 

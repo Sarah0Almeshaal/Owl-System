@@ -12,7 +12,11 @@ import {
   Button,
   Checkbox,
   FormControl,
-  VStack, HStack, Text, Alert, Collapse
+  VStack,
+  HStack,
+  Text,
+  Alert,
+  Collapse,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
@@ -32,26 +36,33 @@ function LoginPage() {
 
   async function login(id, password, navigation) {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
-    await AsyncStorage.setItem("ip", JSON.stringify("http://10.120.1.203:5000"));
-    
-    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "")+"/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: id,
-        password: password,
-        token: token,
-      }),
-    })
+    // IP address of Flak server for future use by multiple pages
+    await AsyncStorage.setItem(
+      "ip",
+      JSON.stringify("http://192.168.1.18:5000")
+    );
+
+    fetch(
+      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          password: password,
+          token: token,
+        }),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data["result"] === 1) {
           idSession(id);
           navigation.navigate("Alerts");
         } else {
-          setShow(true)
+          setShow(true);
         }
       })
       .catch((err) => console.log(err));
@@ -61,7 +72,7 @@ function LoginPage() {
     if (validateId() === true && validatePassword() === true) {
       login(id, password, navigation);
     }
-  };
+  }
 
   function validateId() {
     let isValid = true;
@@ -76,8 +87,7 @@ function LoginPage() {
       });
     }
     return isValid;
-  };
-
+  }
 
   function validatePassword() {
     let isValid = true;
@@ -92,7 +102,7 @@ function LoginPage() {
       });
     }
     return isValid;
-  };
+  }
 
   return (
     <NativeBaseProvider>
@@ -110,9 +120,20 @@ function LoginPage() {
           </Heading>
         </Center>
         <Collapse isOpen={show}>
-          <Alert mx="auto" mt="20px" width="250px" status="error" colorScheme="error">
+          <Alert
+            mx="auto"
+            mt="20px"
+            width="250px"
+            status="error"
+            colorScheme="error"
+          >
             <VStack space={2} flexShrink={1} w="100%">
-              <HStack flexShrink={1} space={2} alignItems="center" justifyContent="space-between">
+              <HStack
+                flexShrink={1}
+                space={2}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 <HStack flexShrink={1} space={2} alignItems="center">
                   <Alert.Icon />
                   <Text fontSize="md" fontWeight="medium" color="coolGray.800">
@@ -131,7 +152,7 @@ function LoginPage() {
                 <InputLeftAddon
                   borderLeftRadius="20"
                   borderWidth="1"
-                  borderColor= "black"
+                  borderColor="black"
                   children={"ID"}
                   w="20%"
                 />
@@ -146,7 +167,7 @@ function LoginPage() {
                   borderRightColor="#FFFFFF"
                   borderLeftWidth="0.5"
                   maxLength={4}
-                  keyboardType='number-pad'
+                  keyboardType="number-pad"
                   onChangeText={(id) => setId(id)}
                 />
               </InputGroup>
@@ -192,7 +213,8 @@ function LoginPage() {
           ml="60px"
           my="60px"
           borderColor={"#808080"}
-          borderWidth="1">
+          borderWidth="1"
+        >
           Remember me
         </Checkbox>
 
@@ -202,7 +224,8 @@ function LoginPage() {
             w="230px"
             rounded="10"
             bg={"#28428C"}
-            onPress={() => validate()}>
+            onPress={() => validate()}
+          >
             Login
           </Button>
         </Center>

@@ -15,9 +15,8 @@ export default function App() {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="Alerts" component={Feed} />
         <Stack.Screen name="LoginPage" component={LoginPage} />
-        <Stack.Screen name="back" component={back} />
+        <Stack.Screen name="Alerts" component={Feed} />
       </Stack.Navigator>
     </NavigationContainer>
   );
