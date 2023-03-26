@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme":"com.owlsecuritysystem.owlalert",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -18,9 +19,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.owlsecuritysystem.owlalert",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification", "location","fetch"]
+      }
     },
     "android": {
+      "package":"com.owlsecuritysystem.owlalert",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

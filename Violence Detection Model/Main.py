@@ -1,32 +1,33 @@
-import os
 import cv2
 import numpy as np
-import pytz
 from datetime import datetime
 from tensorflow import keras
 import matplotlib.pyplot as plt
 from keras.models import load_model
 import mysql.connector
 from collections import deque
+import requests
+import os
 
-##################### < MySQL DB Connection > ######################
-# db = mysql.connector.connect(
-#     host="localhost",
-#     user="owlsys",
-#     password="admin",
-#     database="owlsys"
-# )
 
-# mycursor = db.cursor()
-# db.close()
+#################### < MySQL DB Connection > ######################
+db = mysql.connector.connect(
+    host="localhost",
+    user="owlsys",
+    password="admin",
+    database="owlsys"
+)
+
+mycursor = db.cursor()
+db.close()
 
 ##################### < Print Date and Time Method > ######################
-
 
 def getDateTime():
     localTime = datetime.now()
     Time = "Local Time:", localTime.strftime("%m/%d/%Y, %H:%M:%S")
-    print(Time)
+    # print(Time)
+    return Time
 
 ##################### < Save Video of Violence Method > ######################
 
@@ -40,15 +41,17 @@ def SaveVideo(output_path, W, H):
 
 ##################### < Load Model > ######################
 print("Loading model ...")
-model = keras.models.load_model("model/modelnew.h5")
-
+model = keras.models.load_model('C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Model/modelnew.h5')
 ##################### < Violence Detect > ######################
 
 # '0' = webcam , we can change it to MP4 link for testing
-input_path = "Videos/V_16.mp4"
+input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_16.mp4"
 
 # Save output video file in output_path
-output_path = "Saved Frames/output.avi"
+output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
+
+# save frame in this path
+output_path_frames ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames"
 
 trueCount = 0  # > Violence frames count
 sendAlert = 0
@@ -71,7 +74,9 @@ while cam.isOpened():
         # W: width, H: height of frame img
         (H, W) = frame.shape[:2]
 
+    # capture frame for edit
     output = frame.copy()
+    clean_frame = frame.copy()
 
     # convert frame from BGR to RGB
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -97,7 +102,6 @@ while cam.isOpened():
     if label:
         text_color = (0, 0, 255)
         trueCount += 1
-
     else:
         text_color = (0, 255, 0)
 
@@ -107,14 +111,30 @@ while cam.isOpened():
     cv2.putText(output, text, (35, 50), FONT, 1.25, text_color, 3)
 
     # show the output frame
-    cv2.imshow("Preview", output)
+    # cv2.imshow("CAM", output)
 
     if (trueCount == 40):
         if (sendAlert == 0):
             print("Violence Detected!!")
-            getDateTime()
-            SaveVideo(output_path, W, H)
+            # SaveVideo(output_path, W, H)
+            try:
+                # Get current date of detection
+                now = datetime.now()
+                timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+                # Handle detection's information by calling an API 
+                url = 'http://127.0.0.1:5000/alert'
+                # information about camera and its floor number and detection timestamp
+                info = {'cam':"1.1.1.1",'floor':1,'timestamp':timestamp}
+                response = requests.post(url,json = info,verify=False)
+                parsed = response.json()
+                print(parsed)
+                # store frame with alert as file name
+                if(parsed['result']==1):
+                    cv2.imwrite(os.path.join(output_path_frames,str(parsed["alertId"])+'.jpg'),clean_frame)
+            except Exception as e:
+                print(e)
             sendAlert = 1
+
 
     # if the `q` key was pressed, break from the loop
     if (cv2.waitKey(1) & 0xFF == ord("q")):
