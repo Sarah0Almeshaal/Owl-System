@@ -2,7 +2,7 @@ import "react-native-gesture-handler";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import * as React from "react";
-import { StyleSheet, View, SafeAreaView, Platform, Text, Button } from "react-native";
+import { StyleSheet, View, SafeAreaView, Platform } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import AlertBox from "../components/AlertBox";
 import TopHeader from "../components/TopHeader";
@@ -14,19 +14,20 @@ import { useNavigation } from "@react-navigation/native";
 
 async function checkSession(navigation) {
   try {
-    if (await AsyncStorage.getItem("id") === null) {
-      navigation.navigate("LoginPage")
+    if ((await AsyncStorage.getItem("id")) === null) {
+      navigation.navigate("LoginPage");
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
+// prevent displaying notofication when app is on foreground
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const { origin } = notification;
+    if (origin === "selected") {
+      this.setState({ notification: notification });
+    }
+  },
 });
 
 async function registerForPushNotificationsAsync() {
@@ -60,17 +61,25 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
+let userId = 0;
+getData = async () => {
+  try {
+    const value = await AsyncStorage.getItem("id");
+    if (value !== null) {
+      userId = JSON.parse(value);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+getData();
 export default function Feed() {
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
+  const [alertsObject, setAlertsObject] = useState();
+  const [resolvedAlerts, setResolvedAlerts] = useState([]);
   const notificationListener = useRef();
   const responseListener = useRef();
-  const [alertList, setAlertList] = useState([]);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    checkSession(navigation)
-  }, [])
 
   const myListEmpty = () => {
     return <NoAlertBox />;
@@ -80,54 +89,91 @@ export default function Feed() {
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)
     );
-
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         setNotification(notification);
-        let data = notification.request.content.data;
-        setAlertList((prevState) => {
-          prevState.push(data);
-          return [...prevState];
-        });
       });
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        let data = response.notification.request.content.data;
+        setNotification(response.notification);
       });
+
+    const interval = setInterval(() => {
+      fetchAlerts();
+    }, 5000);
 
     return () => {
       Notifications.removeNotificationSubscription(
         notificationListener.current
       );
       Notifications.removeNotificationSubscription(responseListener.current);
+      clearInterval(interval);
     };
-  }, []);
+  }, [alertsObject]);
+
+  fetchAlerts = async () => {
+    fetch(
+      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") +
+        "/getAlerts",
+      {
+        method: "post",
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+        }),
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        var jsonObj = JSON.parse(data["alertList"]);
+        let result = Object.values(jsonObj).filter(
+          (item) => !resolvedAlerts.includes(item.alertId)
+        );
+        setAlertsObject(result);
+      })
+      .catch(function (error) {
+        console.log(
+          "There has been a problem with your fetch operation: " + error.message
+        );
+      });
+  };
 
   function handleRemove(id) {
-    setAlertList((prevState) => {
-      return prevState.filter((item) => item.id !== id);
+    setAlertsObject((prevState) => {
+      // add alertId to list to be used later in filter for rendering
+      // to not show specific alerts in Feed
+      setResolvedAlerts((oldArray) => [...oldArray, id]);
+      return prevState.filter((item) => item.alertId !== id);
     });
   }
+
   return (
     <View style={styles.main}>
       <TopHeader />
       <SafeAreaView style={styles.container}>
         <FlatList
           style={styles.scrollView}
-          data={Object.values(alertList)}
+          data={alertsObject}
           ListEmptyComponent={myListEmpty}
-          extraData={Object.values(alertList)}
+          extraData={alertsObject}
           renderItem={({ item }) => (
             <AlertBox
-              removeAlert={(alertList) => handleRemove(alertList)}
-              alertId={item.id}
-              vImage={require("../assets/image2.png")}
+              removeAlert={(alertsObject) => handleRemove(alertsObject)}
+              alertId={item.alertId}
+              vImage={item.alertImage}
               floorNo={item.floor}
-              CamNo={item.cam}
+              CamNo={item.camId}
+              ResNo={item.respondents}
+              userId={userId}
             />
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.alertId}
         ></FlatList>
       </SafeAreaView>
       <BottomHeader />

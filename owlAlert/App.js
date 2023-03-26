@@ -5,9 +5,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Feed from "./Screens/AlertFeed";
 import LoginPage from "./Screens/Login";
 import back from "./Screens/back";
-import TestScreen from "./Admin Screens/TestScreen"
-import AlertDetails from "./Admin Screens/AlertDetails"
-import MainScreen from "./Admin Screens/MainScreen"
+import TestScreen from "./Admin Screens/TestScreen";
+import AlertDetails from "./Admin Screens/AlertDetails";
+import MainScreen from "./Admin Screens/MainScreen";
 import CameraSC from "./Admin Screens/CameraSC"
 import AlertHistorySC from "./Admin Screens/AlertHistorySC";
 const Stack = createStackNavigator();
