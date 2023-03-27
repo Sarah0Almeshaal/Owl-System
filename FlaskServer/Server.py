@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 users = []
 alerts = []
-unresolvedTimeInMinutes = 5
+unresolvedTimeInMinutes = 10
 # average Number of users
 numberOfAccept = int(len(users)/2)
 # store all images captured with its alert ids
@@ -31,8 +31,8 @@ def isUnresolved(timestamp):
     n = datetime.now()
     return t<n
 
+
 def isResolved(alertId):
-    id = -1
     # loop through alerts to find alertId
     for alert in alerts:
         if alert["id"] == alertId:
@@ -40,18 +40,16 @@ def isResolved(alertId):
             alert["count"]+=1
             # check if counter equals to specified number (considered resolved)
             if alert["count"]>=numberOfAccept:
-                id = alert["id"]
+                # update alert table alert.status = reolved
+                query = "UPDATE alert SET Status = 'Resolved' WHERE alert.ID = %s;"
+                cursor = connection.cursor()
+                cursor.execute(query,(str(alert["id"])))
+                connection.commit()
                 # remove alert from alert array
                 alerts.remove(alert)
                 break
-    if id!=-1:
-        # update alert table alert.status = reolved
-        query = "UPDATE alert SET Status = 'Resolved' WHERE alert.ID = %s;"
-        cursor = connection.cursor()
-        cursor.execute(query,(str(id)))
-        connection.commit()
 
-def checkAlertStatus():
+def checkAlertsStatus():
     # setInterval every (unresolvedTimeInMinutes)
     # loop through array
     for a in alerts:
@@ -65,6 +63,21 @@ def checkAlertStatus():
             alerts.remove(a)
     connection.commit()
 
+def isAlertUnresolved(id):
+    # loop through array
+    for a in alerts:
+        if alerts["id"]==id:
+            # alert the timestamp call isUnresolved
+            if not isUnresolved(a["time"]):
+            # change alert status to = unresolved
+                query = "UPDATE alert SET Status = 'Unresolved' WHERE alert.ID = %s;"
+                cursor = connection.cursor()
+                cursor.execute(query,(str(a["id"])))
+                # remove alert from array
+                alerts.remove(a)
+                connection.commit()
+                return True
+    return False
 
 
 @app.route('/getAlerts',methods=['POST'])
@@ -83,32 +96,32 @@ def getAlerts():
         records = cursor.fetchall()
         alertList=[]
         for row in records:
-            item = {}
-            item["alertId"] = row[0]
-            item["camId"] = row[1]
-            item["floor"] = row[2]
-            # check if user already Accepted the alert
-            query= ("SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;")
-            cursor.execute(query,(str(userId),str(item["alertId"])))
-            records = cursor.fetchall()
-            isUserAccepted = records[0][0]   
-            if isUserAccepted == 0:                   
-                # Respondents
-                query= ("SELECT count(*) "
-                            "FROM receive " 
-                            "WHERE receive.alertID = %s;")
-                cursor.execute(query,(str(item["alertId"]),))
+            if not isAlertUnresolved(row[0]):
+                item = {}
+                item["alertId"] = row[0]
+                item["camId"] = row[1]
+                item["floor"] = row[2]
+                # check if user already Accepted the alert
+                query= ("SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;")
+                cursor.execute(query,(str(userId),str(item["alertId"])))
                 records = cursor.fetchall()
-                responsCount = records[0][0]
-                item["respondents"] = responsCount
-                # get image as string and store encoded image
-                alertImage = getAlertImage(item["alertId"])
-                item["alertImage"] = alertImage
-                #append dictionary to the list
-                alertList.append(item)
+                isUserAccepted = records[0][0]   
+                if isUserAccepted == 0:                   
+                    # Respondents
+                    query= ("SELECT count(*) "
+                                "FROM receive " 
+                                "WHERE receive.alertID = %s;")
+                    cursor.execute(query,(str(item["alertId"]),))
+                    records = cursor.fetchall()
+                    responsCount = records[0][0]
+                    item["respondents"] = responsCount
+                    # get image as string and store encoded image
+                    alertImage = getAlertImage(item["alertId"])
+                    item["alertImage"] = alertImage
+                    #append dictionary to the list
+                    alertList.append(item)
         jsonString = json.dumps(alertList)
         return jsonify({"alertList":jsonString,"result":1})
-    
     except Exception as e:
         return jsonify({"message":e,"result":-1})
 
@@ -126,10 +139,8 @@ def handleAccept():
             cursor = connection.cursor()
             cursor.execute(insert_data,(str(userId),str(alertId)))
             connection.commit()
-            # ------------>>>>>>>>Incomplete Task------------------
             # change alert status depending on How many Accept needed for it to change
-            # get count of users Accepted the alert
-            # If >= specified amount then change Alert Status to Resolved!!!
+            isResolved(alertId)
         except mysql.connector.Error as e:
             return jsonify({"message":e.msg,"result":-1})
         return jsonify({"result": 1,"alertId":alertId,"userId":userId})
@@ -168,7 +179,7 @@ def getAlert():
         alertId = cursor.lastrowid
         if alertId != 0:
             # append alert info to Alerts array --> to check for resolved/unresolved later on
-            # alerts.append({"id":alertId,"time":timestamp,"count":0})
+            alerts.append({"id":alertId,"time":timestamp,"count":0})
             #3/create sendRecord inserting the retrieved alertID and Json Info 
             try:
                 insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
@@ -186,7 +197,6 @@ def getAlert():
     finally:
         cursor.close()
     
-
 def getAlertImage(alertId):
     try:
         for root, dirs, files in os.walk(imageDirectory):

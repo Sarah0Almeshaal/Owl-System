@@ -5,7 +5,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Feed from "./Screens/AlertFeed";
 import LoginPage from "./Screens/Login";
 import back from "./Screens/back";
-import TestScreen from "./Admin Screens/TestScreen";
 import AlertDetails from "./Admin Screens/AlertDetails";
 import MainScreen from "./Admin Screens/MainScreen";
 
@@ -19,11 +18,10 @@ export default function App() {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="MainScreen" component={MainScreen} />
+        {/* <Stack.Screen name="MainScreen" component={MainScreen} /> */}
         <Stack.Screen name="LoginPage" component={LoginPage} />
-        <Stack.Screen name="AlertDetails" component={AlertDetails} />
+        {/* <Stack.Screen name="AlertDetails" component={AlertDetails} /> */}
         <Stack.Screen name="Alerts" component={Feed} />
-        <Stack.Screen name="back" component={back} />
       </Stack.Navigator>
     </NavigationContainer>
   );

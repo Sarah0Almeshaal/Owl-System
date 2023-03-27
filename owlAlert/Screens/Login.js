@@ -39,7 +39,7 @@ function LoginPage() {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
     await AsyncStorage.setItem(
       "ip",
-      JSON.stringify("http://10.120.1.203:5000")
+      JSON.stringify("http://192.168.1.18:5000")
     );
 
     fetch(
