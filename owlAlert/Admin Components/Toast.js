@@ -1,30 +1,36 @@
 import { React, useState } from "react";
 import { NativeBaseProvider, Center, Button, useToast, VStack, HStack, Alert, Text } from "native-base";
 
-export default function Toast(action) {
- 
+const Toast = props => {
+
+
   const toast = useToast();
-  action = "delete"
-  function specifyAction(action) {
-    let ToastDetails
-    if (action === "delete") {
-      ToastDetails = [{
-        status: "success",
-        variant: "left-accent",
-        description: "Camera deleted successfully",
-      }]
-    } else if (action === "add") {
-      ToastDetails = [{
-        status: "success",
-        variant: "left-accent",
-        description: "Camera added successfully",
-      }]
-    }
-    return ToastDetails
-  }
 
+  let action = props.action
 
-  
+  let ToastDetails = [{
+    status: "success",
+    variant: "left-accent",
+    description: "Camera " + action + "ed successfully",
+  }]
+
+  // function specifyAction(action) {
+  //   let ToastDetails
+  //   if (action === "delete") {
+  //     ToastDetails = [{
+  //       status: "success",
+  //       variant: "left-accent",
+  //       description: "Camera deleted successfully",
+  //     }]
+  //   } else if (action === "add") {
+  //     ToastDetails = [{
+  //       status: "success",
+  //       variant: "left-accent",
+  //       description: "Camera added successfully",
+  //     }]
+  //   }
+  //   return ToastDetails
+  // }
 
   const ToastDialog = ({
     status,
@@ -36,25 +42,19 @@ export default function Toast(action) {
           <HStack space={2} flexShrink={1} alignItems="center">
             <Alert.Icon />
           </HStack>
-          <Text px="6" color={variant === "solid" ? "lightText" : variant !== "outline" ? "darkText" : null} 
+          <Text px="6" color={variant === "solid" ? "lightText" : variant !== "outline" ? "darkText" : null}
             fontWeight="thin" fontSize={"13"}> {description} </Text>
         </HStack>
       </VStack>
     </Alert>;
 
-    let details = specifyAction(action)
+  // let details = specifyAction(action)
 
   return (
     <NativeBaseProvider>
       <Center>
         <VStack space={2}>
-          {details.map((item, index) => <Button key={index} onPress={() => toast.show({
-            render: ({
-            }) => {
-              return <ToastDialog  {...item} />;
-            }
-          })}>
-          </Button>)}
+          {ToastDetails.map((item, index) => <ToastDialog key={index} {...item} />)  }
         </VStack>
       </Center>
 
@@ -62,3 +62,6 @@ export default function Toast(action) {
   );
 }
 
+
+
+export default Toast;
