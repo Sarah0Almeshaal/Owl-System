@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontWeight: "bold",
     color: "#fff",
-    fontSize: Platform.OS === "ios" ? "20%" : 16,
+    fontSize: 16,
   },
   icon: {
     alignSelf: "center",

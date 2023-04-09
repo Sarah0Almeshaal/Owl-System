@@ -4,10 +4,10 @@ import * as Device from "expo-device";
 import * as React from "react";
 import { StyleSheet, View, SafeAreaView, Platform } from "react-native";
 import { useState, useEffect, useRef } from "react";
-import AlertBox from "../components/AlertBox";
-import TopHeader from "../components/TopHeader";
-import BottomHeader from "../components/BottomHeader";
-import NoAlertBox from "../components/NoAlertBox";
+import AlertBox from "../Security Components/AlertBox";
+import TopHeader from "../Security Components/TopHeader";
+import BottomHeader from "../Security Components/BottomHeader";
+import NoAlertBox from "../Security Components/NoAlertBox";
 import { FlatList } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -102,7 +102,7 @@ export default function Feed() {
     const interval = setInterval(() => {
       fetchAlerts();
     }, 5000);
-
+    // 50000
     return () => {
       Notifications.removeNotificationSubscription(
         notificationListener.current

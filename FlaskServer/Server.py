@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 users = []
-alerts = []
-unresolvedTimeInMinutes = 10
+unresolvedTimeInMinutes = 7
 # average Number of users
 numberOfAccept = int(len(users)/2)
 # store all images captured with its alert ids
@@ -19,6 +18,7 @@ imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Det
 try:
     connection = mysql.connector.connect(host='localhost',
                                          database='owlsys', user='owlsys', password='admin')
+    connection.autocommit(True)
 except Exception as e:
     print(e)
 
@@ -31,52 +31,34 @@ def isUnresolved(timestamp):
     n = datetime.now()
     return t<n
 
+def getResponseCount(alertId):
+    query= ("SELECT count(*) "
+            "FROM receive " 
+            "WHERE receive.alertID = %s;")
+    cursor = connection.cursor()
+    cursor.execute(query,(str(alertId),))
+    records = cursor.fetchall()
+    return int(records[0][0])
+
 
 def isResolved(alertId):
-    # loop through alerts to find alertId
-    for alert in alerts:
-        if alert["id"] == alertId:
-            # increment counter by 1
-            alert["count"]+=1
-            # check if counter equals to specified number (considered resolved)
-            if alert["count"]>=numberOfAccept:
-                # update alert table alert.status = reolved
-                query = "UPDATE alert SET Status = 'Resolved' WHERE alert.ID = %s;"
-                cursor = connection.cursor()
-                cursor.execute(query,(str(alert["id"])))
-                connection.commit()
-                # remove alert from alert array
-                alerts.remove(alert)
-                break
+    # check if counter equals to specified number (considered resolved)
+    if getResponseCount(alertId)>=numberOfAccept:
+        # update alert table alert.status = reolved
+        query = "UPDATE alert SET Status = 'resolved' WHERE alert.ID = %s;"
+        cursor = connection.cursor()
+        cursor.execute(query,(str(alertId)))
+        connection.commit()
 
-def checkAlertsStatus():
-    # setInterval every (unresolvedTimeInMinutes)
-    # loop through array
-    for a in alerts:
-        # check for each alert the timestamp call isUnresolved
-        if not isUnresolved(a["time"]):
-        # change alert status to = unresolved
-            query = "UPDATE alert SET Status = 'Unresolved' WHERE alert.ID = %s;"
-            cursor = connection.cursor()
-            cursor.execute(query,(str(a["id"])))
-            # remove alert from array
-            alerts.remove(a)
-    connection.commit()
-
-def isAlertUnresolved(id):
-    # loop through array
-    for a in alerts:
-        if alerts["id"]==id:
-            # alert the timestamp call isUnresolved
-            if not isUnresolved(a["time"]):
-            # change alert status to = unresolved
-                query = "UPDATE alert SET Status = 'Unresolved' WHERE alert.ID = %s;"
-                cursor = connection.cursor()
-                cursor.execute(query,(str(a["id"])))
-                # remove alert from array
-                alerts.remove(a)
-                connection.commit()
-                return True
+def isAlertUnresolved(id,time):
+    # alert the timestamp call isUnresolved
+    if isUnresolved(time):
+    # change alert status to = unresolved
+        query = "UPDATE alert SET alert.Status = 'Unresolved' WHERE alert.ID=%s;"
+        cursor = connection.cursor()
+        cursor.execute(query,(str(id),))
+        connection.commit()
+        return True
     return False
 
 
@@ -86,7 +68,7 @@ def getAlerts():
     userId = content.get('userId')
     # get alerts with a pending status
     try:
-        select_data = ( "SELECT alert.ID as alertId, camera.Id as camId, camera.floor "
+        select_data = ( "SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
                         "FROM alert "
                         "INNER JOIN send ON alert.ID=send.alertID "
                         "INNER JOIN camera ON send.camIP=camera.camIP "
@@ -96,7 +78,7 @@ def getAlerts():
         records = cursor.fetchall()
         alertList=[]
         for row in records:
-            if not isAlertUnresolved(row[0]):
+            if not isAlertUnresolved(row[0],str(row[3])):
                 item = {}
                 item["alertId"] = row[0]
                 item["camId"] = row[1]
@@ -107,14 +89,7 @@ def getAlerts():
                 records = cursor.fetchall()
                 isUserAccepted = records[0][0]   
                 if isUserAccepted == 0:                   
-                    # Respondents
-                    query= ("SELECT count(*) "
-                                "FROM receive " 
-                                "WHERE receive.alertID = %s;")
-                    cursor.execute(query,(str(item["alertId"]),))
-                    records = cursor.fetchall()
-                    responsCount = records[0][0]
-                    item["respondents"] = responsCount
+                    item["respondents"] = getResponseCount(item["alertId"])
                     # get image as string and store encoded image
                     alertImage = getAlertImage(item["alertId"])
                     item["alertImage"] = alertImage
@@ -178,8 +153,6 @@ def getAlert():
         #2/ retieve the alertRecord ID
         alertId = cursor.lastrowid
         if alertId != 0:
-            # append alert info to Alerts array --> to check for resolved/unresolved later on
-            alerts.append({"id":alertId,"time":timestamp,"count":0})
             #3/create sendRecord inserting the retrieved alertID and Json Info 
             try:
                 insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
@@ -275,8 +248,8 @@ def addCamera():
         return jsonify({"result": -1})
 
 
-@app.route('/getAlerts', methods=['GET'])
-def getAlerts():
+@app.route('/getAlertRecord', methods=['GET'])
+def getAlertRecord():
     try:
         sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
         cursor = connection.cursor()
