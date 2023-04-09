@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
 import { View, TouchableOpacity } from "react-native";
+import BottomBar from "./BottomBar";
+import { useNavigation } from "@react-navigation/native";
 
 const AlertLog = () => {
   const [page, setPage] = useState(0);
@@ -8,8 +10,9 @@ const AlertLog = () => {
   const from = page * numberOfItemsPerPage;
   const [items, setItems] = useState([]);
   const to = Math.min((page + 1) * numberOfItemsPerPage, items.length);
+  const navigation = useNavigation();
 
-  const flaskAPI = "http://192.168.0.111:5000/getAlertLog";
+  const flaskAPI = "http://10.10.1.203:5000/getAlertLog";
 
   useEffect(() => {
     getAlertLogData();
@@ -39,7 +42,7 @@ const AlertLog = () => {
   }, [numberOfItemsPerPage]);
 
   const tableRow = (item) => (
-    <DataTable.Row>
+    <DataTable.Row key={item.id}>
       <DataTable.Cell>{item.id}</DataTable.Cell>
       <DataTable.Cell>{item.date}</DataTable.Cell>
       <DataTable.Cell style={{ justifyContent: "center" }}>
@@ -52,7 +55,7 @@ const AlertLog = () => {
               icon="eye"
               iconColor={MD3Colors.error0}
               size={20}
-              onPress={() => console.log("Eye is Pressed")}
+              onPress={() => navigation.navigate("AlertDetails", {alertNum: item.id} )}
             />
           </TouchableOpacity>
         }
