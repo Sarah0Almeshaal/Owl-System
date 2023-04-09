@@ -2,7 +2,6 @@ import base64
 from flask import Flask, request, jsonify, json
 import mysql.connector
 import requests
-import time
 import os
 import datetime
 from datetime import datetime, timedelta
@@ -13,7 +12,9 @@ unresolvedTimeInMinutes = 7
 # average Number of users
 numberOfAccept = int(len(users)/2)
 # store all images captured with its alert ids
-imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/"
+# imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/"
+
+imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Saved Frames/"
 
 try:
     connection = mysql.connector.connect(host='localhost',
@@ -27,9 +28,21 @@ def isUnresolved(timestamp):
     # convert string timestamp to datetime object and compare if specific time has passed
     f = '%Y-%m-%d %H:%M:%S'
     # increment timestamp by the specified timer
-    t = datetime.strptime(timestamp, f) + timedelta(minutes=unresolvedTimeInMinutes)
+    t = datetime.strptime(timestamp, f) + \
+        timedelta(minutes=unresolvedTimeInMinutes)
     n = datetime.now()
     return t<n
+
+
+def getResponseCount(alertId):
+    query= ("SELECT count(*) "
+            "FROM receive " 
+            "WHERE receive.alertID = %s;")
+    cursor = connection.cursor()
+    cursor.execute(query,(str(alertId),))
+    records = cursor.fetchall()
+    return int(records[0][0])
+
 
 def getResponseCount(alertId):
     query= ("SELECT count(*) "
@@ -61,8 +74,7 @@ def isAlertUnresolved(id,time):
         return True
     return False
 
-
-@app.route('/getAlerts',methods=['POST'])
+@app.route('/getAlerts', methods=['POST'])
 def getAlerts():
     content = request.json
     userId = content.get('userId')
@@ -76,7 +88,7 @@ def getAlerts():
         cursor = connection.cursor()
         cursor.execute(select_data)
         records = cursor.fetchall()
-        alertList=[]
+        alertList = []
         for row in records:
             if not isAlertUnresolved(row[0],str(row[3])):
                 item = {}
@@ -98,10 +110,10 @@ def getAlerts():
         jsonString = json.dumps(alertList)
         return jsonify({"alertList":jsonString,"result":1})
     except Exception as e:
-        return jsonify({"message":e,"result":-1})
+        return jsonify({"message": e, "result": -1})
 
 
-@app.route('/accept',methods=['POST'])
+@app.route('/accept', methods=['POST'])
 def handleAccept():
     try:
         # get userID and alertID
@@ -112,24 +124,24 @@ def handleAccept():
         try:
             insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
             cursor = connection.cursor()
-            cursor.execute(insert_data,(str(userId),str(alertId)))
+            cursor.execute(insert_data, (str(userId), str(alertId)))
             connection.commit()
             # change alert status depending on How many Accept needed for it to change
             isResolved(alertId)
         except mysql.connector.Error as e:
-            return jsonify({"message":e.msg,"result":-1})
-        return jsonify({"result": 1,"alertId":alertId,"userId":userId})
+            return jsonify({"message": e.msg, "result": -1})
+        return jsonify({"result": 1, "alertId": alertId, "userId": userId})
     except Exception as e:
         return jsonify({'result': -1, 'messgae': e})
 
 
 # push notification
-def sendPushNotification(token,cam,floor):
+def sendPushNotification(token, cam, floor):
     message = {
         "to": token,
         "sound": 'default',
         "title": 'Violenece Detected',
-        "body": "cam: {} floor: {}".format(cam,floor),
+        "body": "cam: {} floor: {}".format(cam, floor),
         "_contentAvailable": True,
     }
     response = requests.post(
@@ -150,23 +162,24 @@ def getAlert():
         query = "INSERT INTO alert (Status) VALUES ('pending')"
         cursor = connection.cursor()
         cursor.execute(query)
-        #2/ retieve the alertRecord ID
+        # 2/ retieve the alertRecord ID
         alertId = cursor.lastrowid
         if alertId != 0:
             #3/create sendRecord inserting the retrieved alertID and Json Info 
             try:
                 insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
-                cursor.execute(insert_data,(str(cam),str(alertId),timestamp))
+                cursor.execute(
+                    insert_data, (str(cam), str(alertId), timestamp))
                 connection.commit()
             except mysql.connector.Error as e:
-                return jsonify({"message":e.msg,"result":-1})
+                return jsonify({"message": e.msg, "result": -1})
             for user in users:
                 # 4/ push notification
-                sendPushNotification(user["token"],cam,floor)
-            return jsonify({"message": "Data inserted successfully","alertId":alertId,"result": 1})
+                sendPushNotification(user["token"], cam, floor)
+            return jsonify({"message": "Data inserted successfully", "alertId": alertId, "result": 1})
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
-        return jsonify({"message":e.msg,"result":-1})
+        return jsonify({"message": e.msg, "result": -1})
     finally:
         cursor.close()
     
@@ -174,15 +187,17 @@ def getAlertImage(alertId):
     try:
         for root, dirs, files in os.walk(imageDirectory):
             for file in files:
-                if(int(file.replace(".jpg",""))==alertId):
+                if (int(file.replace(".jpg", "")) == alertId):
                     # already found the file name === the alert ID
-                    with open(os.path.join(imageDirectory,file), "rb") as image_file:
-                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                    with open(os.path.join(imageDirectory, file), "rb") as image_file:
+                        encoded_string = base64.b64encode(
+                            image_file.read()).decode('utf-8')
                     return encoded_string
     except Exception as e:
         return e
 
 # -----------------------------------
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -214,6 +229,7 @@ def login():
 
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -337,7 +353,7 @@ def getAlertLogData():
             for record in AlertLogRecords:
                 date = record[2].strftime('%Y-%m-%d')
                 time = record[2].strftime("%H:%M:%S")
-               
+
                 log = {
                     "id": record[0],
                     "status": record[1],
@@ -352,41 +368,60 @@ def getAlertLogData():
         print("Error retrieving data into MySQL table", e)
         return jsonify({"result": -1})
 
-@app.route('/alertDetails', methods=['GET'])
+
+@app.route('/getLastCamera', methods=['GET'])
+def getLastCamera():
+    try:
+        sqlQuery = "select id from owlsys.camera ORDER BY id DESC LIMIT 1;"
+        cursor = connection.cursor()
+        cursor.execute(sqlQuery)
+        cameraLastRow = cursor.fetchone()
+        if cursor.rowcount > 0:
+            return jsonify({"cameraLastRow": cameraLastRow})
+        else:
+            return jsonify({"cameraLastRow": 0})
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
+
+
+@app.route('/alertDetails', methods=['POST'])
 def alertDetails():
     try:
-        # content = request.json
-        # alertId = content.get("alertId")
+        content = request.json
+        alertId = content.get('alertId')
 
-        # alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = %s ;"""
-        # cursor = connection.cursor()
-        # cursor.execute(alertDetailsQuery, (alertId,))
-        # details = cursor.fetchone()
+        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = %s ;"""
+        detailsCursor = connection.cursor()
+        detailsCursor.execute(alertDetailsQuery, (alertId,))
+        details = detailsCursor.fetchone()
 
-        # respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = %s ;"""
-        # cursor.execute(respondentsDetailsQuery, (alertId,))
-        # respondentRecord = cursor.fetchall()
-        # respondents = []
-
-        alertDetailsQuery = "SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = 33;"
-        cursor = connection.cursor()
-        cursor.execute(alertDetailsQuery)
-        details = cursor.fetchone()
-
-        respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = 33 ;"""
-        cursor.execute(respondentsDetailsQuery)
-        respondentRecord = cursor.fetchall()
+        respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = %s ;"""
+        respondentsCursor = connection.cursor()
+        respondentsCursor.execute(respondentsDetailsQuery, (alertId,))
+        respondentRecord = respondentsCursor.fetchall()
         respondents = []
 
-        if cursor.rowcount > 0:
+        try:
+            path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/" + \
+                str(alertId)+".jpg"
+            with open(path, "rb") as image_file:
+                encoded_string = base64.b64encode(
+                    image_file.read()).decode('utf-8')
+        except FileNotFoundError as e:
+            print(e)
+
+        if detailsCursor.rowcount > 0:
             date = details[2].strftime('%Y-%m-%d')
             time = details[2].strftime("%H:%M:%S")
+            print(details[1])
             alertDetails = {
                 "status": details[1],
                 "date": date,
                 "time": time,
                 "camId": details[3],
-                "floor": details[4]
+                "floor": details[4],
+                "image": encoded_string
             }
 
             for record in respondentRecord:
@@ -396,12 +431,25 @@ def alertDetails():
                     "lname": record[2]
                 }
                 respondents.append(respondent)
-            
+
         return jsonify({"alertDetails": alertDetails}, {"respondents": respondents})
 
     except mysql.connector.Error as e:
         print("Error retrieving data into MySQL table", e)
         return jsonify({"result": -1})
+
+
+@app.route('/image', methods=['POST'])
+def getAlertImage():
+    try:
+        alertId = 40
+        path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/image.jpg"
+        with open(path, "rb") as image_file:
+            encoded_string = base64.b64encode(
+                image_file.read()).decode('utf-8')
+            return jsonify({"image": encoded_string})
+    except FileNotFoundError as e:
+         return jsonify({"error": e})
 
 
 if __name__ == "__main__":
