@@ -39,24 +39,20 @@ function LoginPage() {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
     await AsyncStorage.setItem(
       "ip",
-      JSON.stringify("http://10.120.1.203:5000")
+      JSON.stringify("http://192.168.1.24:5000")
     );
 
-    fetch(
-      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-          password: password,
-          token: token,
-        }),
-      }
-    )
-      .then((res) => res.json())
+    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+        password: password,
+        token: token,
+      }),
+    }).then((res) => res.json())
       .then((data) => {
         if (data["result"] === "Security Guard") {
           idSession(id);

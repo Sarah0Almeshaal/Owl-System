@@ -45,7 +45,7 @@ model = keras.models.load_model('C:/Users/jeela/Desktop/VScode workplace/OwlSyst
 ##################### < Violence Detect > ######################
 
 # '0' = webcam , we can change it to MP4 link for testing
-input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_16.mp4"
+input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_15.mp4"
 
 # Save output video file in output_path
 output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
