@@ -41,17 +41,19 @@ def SaveVideo(output_path, W, H):
 
 ##################### < Load Model > ######################
 print("Loading model ...")
-model = keras.models.load_model('C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Model/modelnew.h5')
+# model = keras.models.load_model('C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Model/modelnew.h5')
+model = keras.models.load_model('C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/Model/modelnew.h5')
 ##################### < Violence Detect > ######################
 
 # '0' = webcam , we can change it to MP4 link for testing
-input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_15.mp4"
+# input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_15.mp4"
 
 # Save output video file in output_path
-output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
-
+# output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
+output_path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/Saved Frames/output.avi"
 # save frame in this path
-output_path_frames ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames"
+# output_path_frames ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames"
+output_path_frames ="C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Violence Detection Model/Saved Frames"
 
 trueCount = 0  # > Violence frames count
 sendAlert = 0
@@ -61,7 +63,7 @@ count = 0
 Q = deque(maxlen=128)
 
 # Capture video object
-cam = cv2.VideoCapture(input_path)
+cam = cv2.VideoCapture(1)
 
 while cam.isOpened():
     grabbed, frame = cam.read()
@@ -109,7 +111,7 @@ while cam.isOpened():
     FONT = cv2.FONT_HERSHEY_SIMPLEX
 
     cv2.putText(output, text, (35, 50), FONT, 1.25, text_color, 3)
-
+    cv2.imshow("cam", output)
     # show the output frame
     # cv2.imshow("CAM", output)
 
