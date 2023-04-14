@@ -253,14 +253,14 @@ def logout():
 def addCamera():
     content = request.json
     cameraNum = content.get("cameraNum")
-    cameraIp = content.get("cameraIp")
+    camName = content.get("camName")
     cameraFloor = content.get("cameraFloor")
     adminId = content.get("adminId")
     try:
-        sqlQuery = "INSERT INTO Camera (Id, CamIP, floor, user_Id) VALUES (%s, %s, %s, %s)"
+        sqlQuery = "INSERT INTO Camera (Id, floor, user_Id, cameraName) VALUES (%s, %s, %s, %s)"
         cursor = connection.cursor()
-        cursor.execute(sqlQuery, (int(cameraNum), str(
-            cameraIp), str(cameraFloor), str(adminId)))
+        cursor.execute(sqlQuery, (int(cameraNum), str(cameraFloor), str(adminId), str(
+            camName)))
         connection.commit()
         return jsonify({"result": 1})
     except mysql.connector.Error as e:
@@ -448,14 +448,14 @@ def getCameraInfo():
     try:
         content = request.json
         camName = content.get('camName')
-        cameraInfoQuery = "SELECT floor, camIP FROM CAMERA WHERE cameraName = %s"
+        cameraInfoQuery = "SELECT floor, ID FROM CAMERA WHERE cameraName = %s"
         cameraInfoCursor = connection.cursor()
         cameraInfoCursor.execute(cameraInfoQuery, (camName,))
         cameraInfo = cameraInfoCursor.fetchall()
         for info in cameraInfo:
             floor = info[0]
-            ip = info[1]
-        return jsonify({"floor": floor, "ip": ip})
+            id = info[1]
+        return jsonify({"floor": floor, "id": id})
     except mysql.connector.Error as e:
         print("Error retrieving data into MySQL table", e)
         return jsonify({"result": -1})

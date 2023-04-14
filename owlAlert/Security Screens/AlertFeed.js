@@ -80,6 +80,8 @@ export default function Feed() {
   const [resolvedAlerts, setResolvedAlerts] = useState([]);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const navigation = useNavigation();
+  checkSession(navigation)
 
   const myListEmpty = () => {
     return <NoAlertBox />;

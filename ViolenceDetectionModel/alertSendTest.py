@@ -105,8 +105,8 @@ def getCameraInfo():
     cameraInfo = requests.post(url, json=camName, verify=False)
     response = cameraInfo.json()
     # response[0]
-    print(response["floor"])
-    print(response["ip"])
+    print(response)
+    # print(response["id"])
 
 
 getCameraInfo()

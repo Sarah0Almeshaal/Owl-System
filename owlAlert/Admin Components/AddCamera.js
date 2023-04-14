@@ -6,10 +6,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const App = () => {
   const [floorError, setFloorErrors] = useState({});
-  const [ipError, setIpErrors] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [floor, setFloor] = useState("");
-  const [ip, setIP] = useState('');
   const [cameraNum, setCameraNum] = useState('');
 
   const floors = [
@@ -40,7 +38,7 @@ const App = () => {
       })
   }
 
-  let cameraInfo = { cameraNum: cameraNum, cameraFloor: floor, cameraIp: ip };
+  let cameraInfo = { cameraNum: cameraNum, cameraFloor: floor["value"], camName: "cam " + cameraNum};
 
   async function addCamera(cameraInfo) {
     fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/addCamera", {
@@ -51,7 +49,7 @@ const App = () => {
       body: JSON.stringify({
         cameraNum: cameraInfo.cameraNum,
         cameraFloor: cameraInfo.cameraFloor,
-        cameraIp: cameraInfo.cameraIp,
+        camName: cameraInfo.camName,
         adminId: JSON.parse(await AsyncStorage.getItem("id"))
       }),
     })
@@ -73,17 +71,6 @@ const App = () => {
       isValid = false;
     } else {
       setFloorErrors({
-        floor: "",
-      });
-    }
-    if (ip === "") {
-      setIpErrors({
-        ip: "IP address is required ",
-      });
-      isValid = false;
-    } else {
-      setIpErrors({
-        ip: "",
       });
     }
     if (isValid === true) {
@@ -120,18 +107,6 @@ const App = () => {
                 onChange={floor => setFloor(floor)} />
               <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
                 {floorError.floor}
-              </FormControl.ErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={"ip" in ipError} >
-              <FormControl.Label _text={{ color: "black" }}>IP Address</FormControl.Label>
-              <TextInput
-                style={styles.input}
-                placeholder="0.0.0.0"
-                onChangeText={setIP}
-                value={ip}
-              />
-              <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                {ipError.ip}
               </FormControl.ErrorMessage>
             </FormControl>
             <HStack>

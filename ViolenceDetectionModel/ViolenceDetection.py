@@ -146,7 +146,7 @@ def violenceDetection(camName, camIndex):
                     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
                     # Handle detection's information by calling an API
                     # information about camera and its floor number and detection timestamp
-                    info = {'cam': response["ip"], 'floor': response["floor"],
+                    info = {'cam': response["id"], 'floor': response["floor"],
                             'timestamp': timestamp}
                     url = 'http://127.0.0.1:5000/alert'
                     response = requests.post(url, json=info, verify=False)

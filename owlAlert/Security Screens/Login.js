@@ -27,19 +27,33 @@ async function idSession(id) {
   await AsyncStorage.setItem("id", JSON.stringify(id));
 }
 
+async function checkSession(navigation) {
+  try {
+    id = await AsyncStorage.getItem("id")
+    if (id != null && id === "\"6328\"") {
+      navigation.navigate("MainScreen");
+    } else if (id != null) {
+      navigation.navigate("Alerts");
+    }
+  } catch (error) { }
+}
+
+
 function LoginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation();
   const [idErrors, setIdErrors] = useState({});
   const [passwordError, setPasswordError] = useState({});
   const [show, setShow] = useState(false);
+
+  const navigation = useNavigation();
+  checkSession(navigation)
 
   async function login(id, password, navigation) {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
     await AsyncStorage.setItem(
       "ip",
-      JSON.stringify("http://192.168.1.24:5000")
+      JSON.stringify("http://10.10.1.203:5000")
     );
 
     fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login", {
@@ -68,13 +82,6 @@ function LoginPage() {
   }
 
   function validate() {
-    if (validateId() === true) {
-      setShow(false);
-      login(id, password, navigation);
-    }
-  }
-
-  function validateId() {
     let isValid = true;
     if (id === "") {
       setIdErrors({
@@ -83,7 +90,6 @@ function LoginPage() {
       isValid = false;
     } else {
       setIdErrors({
-        id: "",
       });
     }
     if (password === "") {
@@ -93,10 +99,12 @@ function LoginPage() {
       isValid = false;
     } else {
       setPasswordError({
-        password: "",
       });
     }
-    return isValid;
+    if (isValid) {
+      setShow(false);
+      login(id, password, navigation);
+    }
   }
 
   return (
@@ -226,6 +234,7 @@ function LoginPage() {
             rounded="10"
             bg={"#28428C"}
             onPress={() => validate()}
+
           >
             Login
           </Button>
