@@ -22,7 +22,7 @@ export default function Toast({ action }) {
           <Alert.Icon />
         </HStack>
         <Text px="6" color={"left-accent" === "solid" ? "lightText" : "left-accent" !== "outline" ? "darkText" : null}
-          fontWeight="thin" fontSize={"13"}> {message()} </Text>
+          fontWeight="thin" fontSize={"13"}> {"Camera added successfully"} </Text>
       </HStack>
     </VStack>
   </Alert>;
@@ -31,17 +31,7 @@ export default function Toast({ action }) {
     toast.show({
       render: ({
       }) => {
-        return <Alert maxWidth="90%" alignSelf="center" flexDirection="row" status={"success"} variant={"left-accent"}>
-        <VStack space={1} flexShrink={1} w="100%">
-          <HStack flexShrink={1} alignItems="center" justifyContent="space-between">
-            <HStack space={2} flexShrink={1} alignItems="center">
-              <Alert.Icon />
-            </HStack>
-            <Text px="6" color={"left-accent" === "solid" ? "lightText" : "left-accent" !== "outline" ? "darkText" : null}
-              fontWeight="thin" fontSize={"13"}> {message()} </Text>
-          </HStack>
-        </VStack>
-      </Alert>;
+        <ToastDialog />
       }
     })
   }
