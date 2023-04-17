@@ -348,7 +348,7 @@ def getData():
 @app.route('/getAlertLog', methods=['GET'])
 def getAlertLogData():
     try:
-        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp  FROM alert, send WHERE alert.id = send.alertID"
+        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp FROM alert, send WHERE alert.id = send.alertID"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         AlertLogRecords = cursor.fetchall()
@@ -395,7 +395,7 @@ def alertDetails():
         content = request.json
         alertId = content.get('alertId')
 
-        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = %s ;"""
+        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
         detailsCursor = connection.cursor()
         detailsCursor.execute(alertDetailsQuery, (alertId,))
         details = detailsCursor.fetchone()
@@ -407,7 +407,7 @@ def alertDetails():
         respondents = []
 
         try:
-            path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/" + \
+            path = "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames/" + \
                 str(alertId)+".jpg"
             with open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(
