@@ -1,17 +1,10 @@
 import { NativeBaseProvider } from "native-base";
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity, Alert, Modal, Pressable
-} from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
-import { FormControl, Heading, WarningOutlineIcon, HStack, useToast, Center, Button } from "native-base";
-import { Dropdown } from 'react-native-element-dropdown';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { HStack, Center, Box, Slide, CheckIcon } from "native-base";
 import BottomBar from "../Admin Components/BottomBar";
+import AddCamera from "../Admin Components/AddCamera";
 
 function CameraSC() {
 
@@ -20,8 +13,9 @@ function CameraSC() {
   const from = page * numberOfItemsPerPage;
   const [items, setItems] = useState([]);
   const [itemId, setItemId] = useState("");
-  const [showToast, setShowToast] = useState(false)
-  const toast = useToast();
+  const [confirmMsg, setConfirmMsg] = useState(false);
+  const [actionMsg, setActionMsg] = useState("")
+
 
   const to = Math.min((page + 1) * numberOfItemsPerPage, items.length);
 
@@ -89,13 +83,22 @@ function CameraSC() {
     const index = items.findIndex((item) => item.id === itemId);
     newItems.splice(index, 1);
     setItems(newItems);
+    setConfirmMsg(true)
+    setTimeout(() => {
+      setConfirmMsg(false)
+    }, 10000)
+    setActionMsg("Camera is deleted successfully")
   };
 
   const handleAddCamera = (cameraInfo) => {
     const newItems = [...items];
     newItems.push(cameraInfo)
     setItems(newItems)
-    setShowToast(true)
+    setConfirmMsg(true)
+    setTimeout(() => {
+      setConfirmMsg(false)
+    }, 10000)
+    setActionMsg("Camera is added successfully")
   };
 
 
@@ -154,6 +157,11 @@ function CameraSC() {
             </View>
           </View>
         </View>
+        {confirmMsg === true ?
+          <Center>
+            {confirmMsg === true ?
+              <ConfirmMsgComponent action={actionMsg} open={confirmMsg} /> : <View></View>}
+          </Center> : <View></View>}
       </SafeAreaView>
       <BottomBar />
     </NativeBaseProvider>
@@ -210,250 +218,26 @@ const styles = StyleSheet.create({
   },
 });
 
-const AddCamera = ({ handleCallback }) => {
-  const [floorError, setFloorErrors] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
-  const [floor, setFloor] = useState("");
-  const [cameraNum, setCameraNum] = useState('');
+const ConfirmMsgComponent = ({ action, open }) => {
+  const [isOpen, setIsOpen] = React.useState(open);
+  return <Center>
+    {open === true ?
+      useEffect(() => {
+        setTimeout(() => {
+          setIsOpen(!isOpen)
+        }, 10000)
+      }, []) : <View></View>}
 
-  const floors = [
-    { label: 'Floor 1', value: '1' },
-    { label: 'Floor 2', value: '2' },
-    { label: 'Floor 3', value: '3' },
-    { label: 'Floor 4', value: '4' },
-    { label: 'Floor 5', value: '5' },
-  ];
-
-  async function getCameraId() {
-    setModalVisible(true);
-    fetch(
-      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/getLastCamera",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data["cameraLastRow"] >= 0) {
-          setCameraNum(parseInt(data["cameraLastRow"]) + 1)
-        } else {
-          console.log("ERROR")
-        }
-      })
-  }
-
-  let cameraInfo = { cameraNum: cameraNum, cameraFloor: floor["value"], camName: "cam " + cameraNum };
-
-  async function addCamera(cameraInfo) {
-    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/addCamera", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cameraNum: cameraInfo.cameraNum,
-        cameraFloor: cameraInfo.cameraFloor,
-        camName: cameraInfo.camName,
-        adminId: JSON.parse(await AsyncStorage.getItem("id"))
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data["result"] === 1) {
-          let cam = {
-            "floor": cameraInfo.cameraFloor,
-            "id": cameraInfo.cameraNum
-          }
-          handleCallback(cam)
-        } else {
-        }
-      })
-      .catch((err) => console.log(err));
-  }
-
-  function validateInputs() {
-    let isValid = true;
-    if (floor === "") {
-      setFloorErrors({
-        floor: "Please choose a floor",
-      });
-      isValid = false;
-    } else {
-      setFloorErrors({
-      });
-    }
-    if (isValid === true) {
-      addCamera(cameraInfo);
-      setModalVisible(false)
-      setFloorErrors({});
-    }
-  };
-
-  return (
-    <View style={cameraStyles.centeredView}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}>
-        <View style={cameraStyles.centeredView}>
-          <View style={cameraStyles.modalView}>
-            <Heading size="sm" style={cameraStyles.modalText}>Add Camera #{cameraNum}</Heading>
-            <FormControl isRequired isInvalid={"floor" in floorError}>
-              <FormControl.Label _text={{ color: "black" }}>Floor</FormControl.Label>
-              <Dropdown style={cameraStyles.dropdown}
-                placeholderStyle={cameraStyles.placeholderStyle}
-                selectedTextStyle={cameraStyles.selectedTextStyle}
-                inputSearchStyle={cameraStyles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={floors}
-                labelField="label"
-                valueField="value"
-                placeholder="Select Floor"
-                value={floor}
-                onChange={floor => setFloor(floor)} />
-              <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                {floorError.floor}
-              </FormControl.ErrorMessage>
-            </FormControl>
-            <HStack>
-              <Pressable
-                style={[cameraStyles.button, cameraStyles.cancle]}
-                onPress={() => { setModalVisible(!modalVisible), setFloorErrors({}), setFloor("") }}>
-                <Text style={cameraStyles.cancleStyle}>Cancle</Text>
-              </Pressable>
-              <Pressable
-                style={[cameraStyles.button]}
-                onPress={() => validateInputs()}>
-                <Text style={cameraStyles.textStyle}>Add Camera</Text>
-              </Pressable>
+    {isOpen === true ?
+      <Center>
+        <Slide in={isOpen} placement="top">
+          <Box w="85%" bgColor={"emerald.100"} h={"55px"} alignItems="center" margin={"35px"} padding={"15px"} borderRadius="20px">
+            <HStack space={2}>
+              <CheckIcon size="4" color="emerald.600" mt="1" />
+              <Text color="emerald.600" textAlign="center" fontWeight="medium">{action}</Text>
             </HStack>
-          </View>
-        </View>
-      </Modal>
-      <Pressable
-        style={[cameraStyles.addButton]}
-        onPress={() => getCameraId()}>
-        <Text style={cameraStyles.textStyle} >+ Add</Text>
-      </Pressable>
-    </View>
-  );
+          </Box>
+        </Slide>
+      </Center> : <View></View>}
+  </Center>
 };
-
-const cameraStyles = StyleSheet.create({
-  addButton: {
-    borderRadius: 20,
-    padding: 10,
-    width: 80,
-    backgroundColor: '#0785F9',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingTop: 35,
-    paddingBottom: 35,
-    paddingLeft: 15,
-    paddingRight: 15,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 10,
-    width: 130,
-    backgroundColor: '#0785F9',
-  },
-  textStyle: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  dropdown: {
-    marginTop: 3,
-    height: 40,
-    width: 180,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  item: {
-    padding: 17,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  textItem: {
-    flex: 1,
-    fontSize: 13,
-  },
-  placeholderStyle: {
-    fontSize: 13,
-    color: 'gray'
-  },
-  selectedTextStyle: {
-    fontSize: 13,
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    marginBottom: 20,
-    padding: 10,
-    width: 180,
-    borderRadius: 12,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-  },
-  cancle: {
-    backgroundColor: 'white',
-    padding: 10,
-    width: 140,
-  },
-  cancleStyle: {
-    color: 'black',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 12,
-  },
-
-});

@@ -8,7 +8,6 @@ import AlertDetails from "./Admin Screens/AlertDetails";
 import MainScreen from "./Admin Screens/MainScreen";
 import CameraSC from "./Admin Screens/CameraSC";
 import AlertHistorySC from "./Admin Screens/AlertHistorySC";
-
 const Stack = createStackNavigator();
 
 export default function App() {
