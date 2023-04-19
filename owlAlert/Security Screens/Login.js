@@ -172,7 +172,7 @@ function LoginPage() {
         <FormControl isRequired isInvalid={"password" in passwordError}>
           <Center>
             <Stack alignItems="center">
-              <InputGroup w="80%" mt="30px" marginTop="50px">
+              <InputGroup w="80%" mt="30px" marginTop="40px">
                 <InputLeftAddon
                   borderLeftRadius="20"
                   borderWidth="1"
@@ -211,7 +211,7 @@ function LoginPage() {
             rounded="10"
             bg={"#28428C"}
             onPress={() => validate()}
-            my="100px"
+            my="70px"
           >
             Login
           </Button>
