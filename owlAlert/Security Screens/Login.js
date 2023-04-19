@@ -1,36 +1,23 @@
 import { React, useState } from "react";
 import {
-  NativeBaseProvider,
-  Box,
-  Center,
-  Image,
-  Stack,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  Heading,
-  Button,
-  Checkbox,
-  FormControl,
-  VStack,
-  HStack,
-  Text,
-  Alert,
-  Collapse,
-  WarningOutlineIcon,
+  NativeBaseProvider, Box, Center, Image, Stack, Input, InputGroup,
+  InputLeftAddon, Heading, Button, Checkbox, FormControl, VStack, HStack,
+  Text, Alert, Collapse, WarningOutlineIcon,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-async function idSession(id) {
+async function loginSession(id, type) {
   await AsyncStorage.setItem("id", JSON.stringify(id));
+  await AsyncStorage.setItem("userType", JSON.stringify(type));
 }
 
 async function checkSession(navigation) {
   try {
     id = await AsyncStorage.getItem("id")
-    if (id != null && id === "\"6328\"") {
+    type = await AsyncStorage.getItem("userType")
+    if (id != null && type === "Admin") {
       navigation.navigate("MainScreen");
     } else if (id != null) {
       navigation.navigate("Alerts");
@@ -44,7 +31,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [idErrors, setIdErrors] = useState({});
   const [passwordError, setPasswordError] = useState({});
-  const [show, setShow] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const navigation = useNavigation();
   checkSession(navigation)
@@ -69,13 +56,13 @@ function LoginPage() {
     }).then((res) => res.json())
       .then((data) => {
         if (data["result"] === "Security Guard") {
-          idSession(id);
+          loginSession(id, "Security Guard");
           navigation.navigate("Alerts");
         } else if (data["result"] === "Admin") {
-          idSession(id);
+          loginSession(id, "Admin");
           navigation.navigate("MainScreen");
         } else {
-          setShow(true);
+          setShowError(true);
         }
       })
       .catch((err) => console.log(err));
@@ -102,7 +89,7 @@ function LoginPage() {
       });
     }
     if (isValid) {
-      setShow(false);
+      setShowError(false);
       login(id, password, navigation);
     }
   }
@@ -116,14 +103,14 @@ function LoginPage() {
             alt="Owl System Logo"
             width={170}
             height={170}
-            my="50px"
+            my="100px"
             mb={"0"}
           />
           <Heading fontSize="3xl" bold>
             Login
           </Heading>
         </Center>
-        <Collapse isOpen={show}>
+        <Collapse isOpen={showError}>
           <Alert
             mx="auto"
             mt="20px"
@@ -151,7 +138,7 @@ function LoginPage() {
 
         <FormControl isRequired isInvalid={"id" in idErrors}>
           <Stack alignItems="center">
-            <InputGroup mt="30px">
+            <InputGroup mt="30px" marginTop="60px">
               <InputLeftAddon
                 borderLeftRadius="20"
                 borderWidth="1"
@@ -185,7 +172,7 @@ function LoginPage() {
         <FormControl isRequired isInvalid={"password" in passwordError}>
           <Center>
             <Stack alignItems="center">
-              <InputGroup w="80%" mt="30px">
+              <InputGroup w="80%" mt="30px" marginTop="50px">
                 <InputLeftAddon
                   borderLeftRadius="20"
                   borderWidth="1"
@@ -217,16 +204,6 @@ function LoginPage() {
           </Center>
         </FormControl>
 
-        <Checkbox
-          value="one"
-          ml="60px"
-          my="60px"
-          borderColor={"#808080"}
-          borderWidth="1"
-        >
-          Remember me
-        </Checkbox>
-
         <Center>
           <Button
             size="md"
@@ -234,7 +211,7 @@ function LoginPage() {
             rounded="10"
             bg={"#28428C"}
             onPress={() => validate()}
-
+            my="100px"
           >
             Login
           </Button>
@@ -245,3 +222,4 @@ function LoginPage() {
 }
 
 export default LoginPage;
+
