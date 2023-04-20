@@ -163,7 +163,7 @@ function CameraSC() {
               <ConfirmMsgComponent action={actionMsg} open={confirmMsg} /> : <View></View>}
           </Center> : <View></View>}
       </SafeAreaView>
-      <BottomBar />
+      {/* <BottomBar /> */}
     </NativeBaseProvider>
   );
 }

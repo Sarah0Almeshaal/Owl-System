@@ -17,9 +17,9 @@ async function checkSession(navigation) {
   try {
     id = await AsyncStorage.getItem("id")
     type = await AsyncStorage.getItem("userType")
-    if (id != null && type === "Admin") {
-      navigation.navigate("MainScreen");
-    } else if (id != null) {
+    if (id != null && type === "\"Admin\"") {
+      navigation.navigate("AdminConatiner");
+    } else if (id != null && type === "\"Security Guard\"") {
       navigation.navigate("Alerts");
     }
   } catch (error) { }
@@ -60,7 +60,7 @@ function LoginPage() {
           navigation.navigate("Alerts");
         } else if (data["result"] === "Admin") {
           loginSession(id, "Admin");
-          navigation.navigate("MainScreen");
+          navigation.navigate("AdminConatiner");
         } else {
           setShowError(true);
         }

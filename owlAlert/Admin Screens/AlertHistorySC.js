@@ -18,7 +18,7 @@ function AlertHistorySC() {
         </View>
       </View>
     </SafeAreaView>
-    <BottomBar />
+    {/* <BottomBar /> */}
     </NativeBaseProvider>
   );
 }

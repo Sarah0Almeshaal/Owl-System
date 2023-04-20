@@ -54,8 +54,7 @@ const AlertLog = () => {
               icon="eye"
               iconColor={MD3Colors.error0}
               size={20}
-              onPress={() => navigation.navigate("AlertDetails", {alertNum: item.id} )}
-            />
+              onPress={() => navigation.navigate("alertDetails", {alertNum: item.id})}/>
           </TouchableOpacity>
         }
       </DataTable.Cell>

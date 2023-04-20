@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 
 async function checkSession(navigation) {
   try {
-    if ((await AsyncStorage.getItem("id")) === null) {
+    if ((await AsyncStorage.getItem("id")) === null || (await AsyncStorage.getItem("userType")) === "\"Admin\"") {
       navigation.navigate("LoginPage");
     }
   } catch (error) {}

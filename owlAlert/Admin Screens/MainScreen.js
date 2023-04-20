@@ -139,7 +139,7 @@ export default function MainScreen() {
                     />
                 </Center>
             </SafeAreaView>
-            <BottomBar />
+            {/* <BottomBar /> */}
         </NativeBaseProvider>
     );
 }
