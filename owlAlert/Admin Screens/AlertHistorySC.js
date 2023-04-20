@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import AlertLog from "../Admin Components/AlertLog";
-import BottomBar from "../Admin Components/BottomBar";
 import { NativeBaseProvider } from "native-base";
 
 function AlertHistorySC() {
@@ -18,7 +17,6 @@ function AlertHistorySC() {
         </View>
       </View>
     </SafeAreaView>
-    {/* <BottomBar /> */}
     </NativeBaseProvider>
   );
 }

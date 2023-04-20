@@ -3,7 +3,6 @@ import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Alert } from "r
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
 import { HStack, Center, Box, Slide, CheckIcon } from "native-base";
-import BottomBar from "../Admin Components/BottomBar";
 import AddCamera from "../Admin Components/AddCamera";
 
 function CameraSC() {
@@ -163,7 +162,6 @@ function CameraSC() {
               <ConfirmMsgComponent action={actionMsg} open={confirmMsg} /> : <View></View>}
           </Center> : <View></View>}
       </SafeAreaView>
-      {/* <BottomBar /> */}
     </NativeBaseProvider>
   );
 }

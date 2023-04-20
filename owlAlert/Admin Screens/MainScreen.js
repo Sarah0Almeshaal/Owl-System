@@ -11,7 +11,6 @@ import {
   Center,
 } from "native-base";
 import { TouchableOpacity, StyleSheet } from "react-native";
-import BottomBar from "../Admin Components/BottomBar";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -139,7 +138,6 @@ export default function MainScreen() {
                     />
                 </Center>
             </SafeAreaView>
-            {/* <BottomBar /> */}
         </NativeBaseProvider>
     );
 }
