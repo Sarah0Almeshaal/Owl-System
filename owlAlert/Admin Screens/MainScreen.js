@@ -121,7 +121,7 @@ export default function MainScreen() {
                         <Heading size={"sm"} mb="5" top="3">
                             Brief History
                         </Heading>
-                        <Button bg="#97B2D7" rounded={"3xl"} size="xs" ml="20" onPress={() => navigation.navigate("AlertHistorySC")}>
+                        <Button bg="#97B2D7" rounded={"3xl"} size="xs" ml="20" onPress={() => navigation.navigate("Alerts")}>
                             View More
                         </Button>
                     </HStack>
