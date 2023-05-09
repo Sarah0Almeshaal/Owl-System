@@ -1,18 +1,8 @@
 import { React, useState, useEffect } from "react";
-import {
-  NativeBaseProvider,
-  Heading,
-  HStack,
-  VStack,
-  Box,
-  Image,
-  Text,
-  Button,
-  Center,
-} from "native-base";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import { NativeBaseProvider, Heading, HStack, VStack, Box, Image, Text, Button, Center } from "native-base";
+import { TouchableOpacity, StyleSheet } from "react-native"
 import BottomBar from "../Admin Components/BottomBar";
-import { SimpleLineIcons } from "@expo/vector-icons";
+import { SimpleLineIcons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ContributionGraph } from "react-native-chart-kit";
