@@ -2,15 +2,12 @@ import cv2
 import numpy as np
 from datetime import datetime
 from tensorflow import keras
-import matplotlib.pyplot as plt
 from keras.models import load_model
-import mysql.connector
 from collections import deque
 import requests
 import os
 import wmi
 import threading
-
 
 class camThread(threading.Thread):
     def __init__(self, previewName, camID):
@@ -20,27 +17,6 @@ class camThread(threading.Thread):
 
     def run(self):
         violenceDetection(self.previewName, self.camID)
-
-
-#################### < MySQL DB Connection > ######################
-db = mysql.connector.connect(
-    host="localhost",
-    user="owlsys",
-    password="admin",
-    database="owlsys"
-)
-
-mycursor = db.cursor()
-db.close()
-
-##################### < Print Date and Time Method > ######################
-
-
-def getDateTime():
-    localTime = datetime.now()
-    Time = "Local Time:", localTime.strftime("%m/%d/%Y, %H:%M:%S")
-    # print(Time)
-    return Time
 
 ##################### < Save Video of Violence Method > ######################
 
@@ -62,7 +38,7 @@ model = keras.models.load_model(
 
 
 def violenceDetection(camName, camIndex):
-
+    
     # '0' = webcam , we can change it to MP4 link for testing
     # input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_15.mp4"
 
@@ -126,11 +102,10 @@ def violenceDetection(camName, camIndex):
 
         text = "Violence: {}".format(label)
         FONT = cv2.FONT_HERSHEY_SIMPLEX
-
         cv2.putText(output, text, (10, 50), FONT, 1, text_color, 3)
-        cv2.putText(output, camName, (500, 50), FONT, 1, text_color, 3)
+        cv2.putText(output, str(camName), (500, 50), FONT, 1, text_color, 3)
         # show the output frame
-        cv2.imshow(camName, output)
+        cv2.imshow(str(camName), output)
 
         if (trueCount == 40):
             if (sendAlert == 0):
@@ -138,8 +113,7 @@ def violenceDetection(camName, camIndex):
                 # SaveVideo(output_path, W, H)
                 try:
                     url = 'http://127.0.0.1:5000/getCameraInfo'
-                    camName = {'camName': camName}
-                    cameraInfo = requests.post(url, json=camName, verify=False)
+                    cameraInfo = requests.post(url, json={'camName': camName}, verify=False)
                     response = cameraInfo.json()
                     # Get current date of detection
                     now = datetime.now()
@@ -166,7 +140,7 @@ def violenceDetection(camName, camIndex):
 
     print('Video recording ends. Release Memory.')
     cam.release()
-    cv2.destroyWindow(camName)
+    cv2.destroyWindow(str(camName))
 
 
 c = wmi.WMI()
@@ -175,7 +149,6 @@ camThreads = []
 index = 0
 for item in c.query(wql):
     if (item.Dependent.PNPClass == "Camera"):
-        print(item.Dependent.Name)
         camThreads.append(camThread(item.Dependent.Name, index))
         camThreads[index].start()
         index += 1
