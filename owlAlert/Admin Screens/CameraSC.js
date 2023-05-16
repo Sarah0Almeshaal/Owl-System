@@ -1,17 +1,9 @@
 import { NativeBaseProvider } from "native-base";
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity, Alert
-} from "react-native";
-import BottomBar from "../Admin Components/BottomBar";
-import AddCamera from "../Admin Components/AddCamera";
+import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
-
-// items[items.length - 1].id  
+import { HStack, Center, Box, Slide, CheckIcon } from "native-base";
+import AddCamera from "../Admin Components/AddCamera";
 
 function CameraSC() {
 
@@ -19,8 +11,10 @@ function CameraSC() {
   const [numberOfItemsPerPage, onItemsPerPageChange] = useState(6);
   const from = page * numberOfItemsPerPage;
   const [items, setItems] = useState([]);
-    const [newItems, setNewItems] = useState([]);
   const [itemId, setItemId] = useState("");
+  const [confirmMsg, setConfirmMsg] = useState(false);
+  const [actionMsg, setActionMsg] = useState("")
+
 
   const to = Math.min((page + 1) * numberOfItemsPerPage, items.length);
 
@@ -37,6 +31,7 @@ function CameraSC() {
       .then((res) => res.json())
       .then((data) => {
         if (data["result"] === 1) {
+          handleDeleteClick(itemId)
         } else {
           console.log("ERROR")
         }
@@ -44,14 +39,14 @@ function CameraSC() {
       .catch((err) => console.log(err));
   }
 
-  function createAlert() {
+  function createAlert(itemId) {
     Alert.alert('Delete Camera', "This will remove all data relating to camera " + itemId + "." + " This action cannot be reversed.", [
       {
         text: 'Cancel',
         style: 'cancel',
       },
-      { text: 'OK', onPress: () => { handleDeleteClick(itemId); deleteCamera(itemId); }},
-      ]);
+      { text: 'OK', onPress: () => deleteCamera(itemId) },
+    ]);
   }
 
   const flaskAPI = "http://10.10.1.203:5000//getCamerasData";
@@ -87,12 +82,24 @@ function CameraSC() {
     const index = items.findIndex((item) => item.id === itemId);
     newItems.splice(index, 1);
     setItems(newItems);
+    setConfirmMsg(true)
+    setTimeout(() => {
+      setConfirmMsg(false)
+    }, 10000)
+    setActionMsg("Camera is deleted successfully")
   };
 
-  function deleteFunc(itemId) {
-    setItemId(itemId)
-    createAlert()
-  }
+  const handleAddCamera = (cameraInfo) => {
+    const newItems = [...items];
+    newItems.push(cameraInfo)
+    setItems(newItems)
+    setConfirmMsg(true)
+    setTimeout(() => {
+      setConfirmMsg(false)
+    }, 10000)
+    setActionMsg("Camera is added successfully")
+  };
+
 
   let tableRoww = (item) => (
     <DataTable.Row key={item.id} >
@@ -105,7 +112,7 @@ function CameraSC() {
               icon="delete-forever"
               iconColor={MD3Colors.error50}
               size={30}
-              onPress={() => deleteFunc(itemId)}
+              onPress={() => createAlert(item.id)}
             />
           </TouchableOpacity>
         </View>
@@ -122,7 +129,7 @@ function CameraSC() {
           <View style={styles.box}>
             <View style={styles.row}>
               <Text style={styles.title}>Cameras List </Text>
-              <AddCamera />
+              <AddCamera handleCallback={handleAddCamera} />
             </View>
             <View>
               <DataTable>
@@ -149,8 +156,12 @@ function CameraSC() {
             </View>
           </View>
         </View>
+        {confirmMsg === true ?
+          <Center>
+            {confirmMsg === true ?
+              <ConfirmMsgComponent action={actionMsg} open={confirmMsg} /> : <View></View>}
+          </Center> : <View></View>}
       </SafeAreaView>
-      <BottomBar />
     </NativeBaseProvider>
   );
 }
@@ -204,3 +215,27 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+
+const ConfirmMsgComponent = ({ action, open }) => {
+  const [isOpen, setIsOpen] = React.useState(open);
+  return <Center>
+    {open === true ?
+      useEffect(() => {
+        setTimeout(() => {
+          setIsOpen(!isOpen)
+        }, 10000)
+      }, []) : <View></View>}
+
+    {isOpen === true ?
+      <Center>
+        <Slide in={isOpen} placement="top">
+          <Box w="85%" bgColor={"emerald.100"} h={"55px"} alignItems="center" margin={"35px"} padding={"15px"} borderRadius="20px">
+            <HStack space={2}>
+              <CheckIcon size="4" color="emerald.600" mt="1" />
+              <Text color="emerald.600" textAlign="center" fontWeight="medium">{action}</Text>
+            </HStack>
+          </Box>
+        </Slide>
+      </Center> : <View></View>}
+  </Center>
+};

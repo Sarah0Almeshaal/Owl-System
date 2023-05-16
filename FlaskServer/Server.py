@@ -31,48 +31,50 @@ def isUnresolved(timestamp):
     t = datetime.strptime(timestamp, f) + \
         timedelta(minutes=unresolvedTimeInMinutes)
     n = datetime.now()
-    return t<n
+    return t < n
 
 
 def getResponseCount(alertId):
-    query= ("SELECT count(*) "
-            "FROM receive " 
-            "WHERE receive.alertID = %s;")
+    query = ("SELECT count(*) "
+             "FROM receive "
+             "WHERE receive.alertID = %s;")
     cursor = connection.cursor()
-    cursor.execute(query,(str(alertId),))
+    cursor.execute(query, (str(alertId),))
     records = cursor.fetchall()
     return int(records[0][0])
 
 
 def getResponseCount(alertId):
-    query= ("SELECT count(*) "
-            "FROM receive " 
-            "WHERE receive.alertID = %s;")
+    query = ("SELECT count(*) "
+             "FROM receive "
+             "WHERE receive.alertID = %s;")
     cursor = connection.cursor()
-    cursor.execute(query,(str(alertId),))
+    cursor.execute(query, (str(alertId),))
     records = cursor.fetchall()
     return int(records[0][0])
 
 
 def isResolved(alertId):
     # check if counter equals to specified number (considered resolved)
-    if getResponseCount(alertId)>=numberOfAccept:
+    if getResponseCount(alertId) >= numberOfAccept:
         # update alert table alert.status = reolved
         query = "UPDATE alert SET Status = 'resolved' WHERE alert.ID = %s;"
         cursor = connection.cursor()
-        cursor.execute(query,(str(alertId)))
+        cursor.execute(query, (str(alertId)))
         connection.commit()
 
-def isAlertUnresolved(id,time):
+
+def isAlertUnresolved(id, time):
     # alert the timestamp call isUnresolved
     if isUnresolved(time):
-    # change alert status to = unresolved
+        # change alert status to = unresolved
         query = "UPDATE alert SET alert.Status = 'Unresolved' WHERE alert.ID=%s;"
         cursor = connection.cursor()
-        cursor.execute(query,(str(id),))
+        cursor.execute(query, (str(id),))
         connection.commit()
         return True
     return False
+
 
 @app.route('/getAlerts', methods=['POST'])
 def getAlerts():
@@ -80,35 +82,36 @@ def getAlerts():
     userId = content.get('userId')
     # get alerts with a pending status
     try:
-        select_data = ( "SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
-                        "FROM alert "
-                        "INNER JOIN send ON alert.ID=send.alertID "
-                        "INNER JOIN camera ON send.camIP=camera.camIP "
-                        "WHERE alert.Status = 'pending';")
+        select_data = ("SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
+                       "FROM alert "
+                       "INNER JOIN send ON alert.ID=send.alertID "
+                       "INNER JOIN camera ON send.camIP=camera.camIP "
+                       "WHERE alert.Status = 'pending';")
         cursor = connection.cursor()
         cursor.execute(select_data)
         records = cursor.fetchall()
         alertList = []
         for row in records:
-            if not isAlertUnresolved(row[0],str(row[3])):
+            if not isAlertUnresolved(row[0], str(row[3])):
                 item = {}
                 item["alertId"] = row[0]
                 item["camId"] = row[1]
                 item["floor"] = row[2]
                 # check if user already Accepted the alert
-                query= ("SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;")
-                cursor.execute(query,(str(userId),str(item["alertId"])))
+                query = (
+                    "SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;")
+                cursor.execute(query, (str(userId), str(item["alertId"])))
                 records = cursor.fetchall()
-                isUserAccepted = records[0][0]   
-                if isUserAccepted == 0:                   
+                isUserAccepted = records[0][0]
+                if isUserAccepted == 0:
                     item["respondents"] = getResponseCount(item["alertId"])
                     # get image as string and store encoded image
                     alertImage = getAlertImage(item["alertId"])
                     item["alertImage"] = alertImage
-                    #append dictionary to the list
+                    # append dictionary to the list
                     alertList.append(item)
         jsonString = json.dumps(alertList)
-        return jsonify({"alertList":jsonString,"result":1})
+        return jsonify({"alertList": jsonString, "result": 1})
     except Exception as e:
         return jsonify({"message": e, "result": -1})
 
@@ -165,7 +168,7 @@ def getAlert():
         # 2/ retieve the alertRecord ID
         alertId = cursor.lastrowid
         if alertId != 0:
-            #3/create sendRecord inserting the retrieved alertID and Json Info 
+            # 3/create sendRecord inserting the retrieved alertID and Json Info
             try:
                 insert_data = "INSERT INTO send VALUES (%s,%s,%s)"
                 cursor.execute(
@@ -182,7 +185,8 @@ def getAlert():
         return jsonify({"message": e.msg, "result": -1})
     finally:
         cursor.close()
-    
+
+
 def getAlertImage(alertId):
     try:
         for root, dirs, files in os.walk(imageDirectory):
@@ -249,14 +253,14 @@ def logout():
 def addCamera():
     content = request.json
     cameraNum = content.get("cameraNum")
-    cameraIp = content.get("cameraIp")
+    camName = content.get("camName")
     cameraFloor = content.get("cameraFloor")
     adminId = content.get("adminId")
     try:
-        sqlQuery = "INSERT INTO Camera (Id, CamIP, floor, user_Id) VALUES (%s, %s, %s, %s)"
+        sqlQuery = "INSERT INTO Camera (Id, floor, user_Id, cameraName) VALUES (%s, %s, %s, %s)"
         cursor = connection.cursor()
-        cursor.execute(sqlQuery, (int(cameraNum), str(
-            cameraIp), str(cameraFloor), str(adminId)))
+        cursor.execute(sqlQuery, (int(cameraNum), str(cameraFloor), str(adminId), str(
+            camName)))
         connection.commit()
         return jsonify({"result": 1})
     except mysql.connector.Error as e:
@@ -344,7 +348,7 @@ def getData():
 @app.route('/getAlertLog', methods=['GET'])
 def getAlertLogData():
     try:
-        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp  FROM alert, send WHERE alert.id = send.alertID"
+        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp FROM alert, send WHERE alert.id = send.alertID"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         AlertLogRecords = cursor.fetchall()
@@ -391,7 +395,7 @@ def alertDetails():
         content = request.json
         alertId = content.get('alertId')
 
-        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.camIP = owlsys.send.camIP WHERE alertID = %s ;"""
+        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
         detailsCursor = connection.cursor()
         detailsCursor.execute(alertDetailsQuery, (alertId,))
         details = detailsCursor.fetchone()
@@ -403,7 +407,7 @@ def alertDetails():
         respondents = []
 
         try:
-            path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/" + \
+            path = "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames/" + \
                 str(alertId)+".jpg"
             with open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(
@@ -439,17 +443,35 @@ def alertDetails():
         return jsonify({"result": -1})
 
 
-@app.route('/image', methods=['POST'])
-def getAlertImage():
+@app.route('/getCameraInfo', methods=['POST'])
+def getCameraInfo():
     try:
-        alertId = 40
-        path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/image.jpg"
-        with open(path, "rb") as image_file:
-            encoded_string = base64.b64encode(
-                image_file.read()).decode('utf-8')
-            return jsonify({"image": encoded_string})
-    except FileNotFoundError as e:
-         return jsonify({"error": e})
+        content = request.json
+        camName = content.get('camName')
+        cameraInfoQuery = "SELECT floor, ID FROM CAMERA WHERE cameraName = %s"
+        cameraInfoCursor = connection.cursor()
+        cameraInfoCursor.execute(cameraInfoQuery, (camName,))
+        cameraInfo = cameraInfoCursor.fetchall()
+        for info in cameraInfo:
+            floor = info[0]
+            id = info[1]
+        return jsonify({"floor": floor, "id": id})
+    except mysql.connector.Error as e:
+        print("Error retrieving data into MySQL table", e)
+        return jsonify({"result": -1})
+
+
+# @app.route('/image', methods=['POST'])
+# def getAlertImage():
+#     try:
+#         alertId = 40
+#         path = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Owl-System/Saved Frames/image.jpg"
+#         with open(path, "rb") as image_file:
+#             encoded_string = base64.b64encode(
+#                 image_file.read()).decode('utf-8')
+#             return jsonify({"image": encoded_string})
+#     except FileNotFoundError as e:
+#          return jsonify({"error": e})
 
 
 if __name__ == "__main__":

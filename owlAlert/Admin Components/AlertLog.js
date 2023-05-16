@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
 import { View, TouchableOpacity } from "react-native";
-import BottomBar from "./BottomBar";
 import { useNavigation } from "@react-navigation/native";
 
 const AlertLog = () => {
@@ -55,8 +54,7 @@ const AlertLog = () => {
               icon="eye"
               iconColor={MD3Colors.error0}
               size={20}
-              onPress={() => navigation.navigate("AlertDetails", {alertNum: item.id} )}
-            />
+              onPress={() => navigation.navigate("alertDetails", {alertNum: item.id})}/>
           </TouchableOpacity>
         }
       </DataTable.Cell>

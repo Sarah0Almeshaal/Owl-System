@@ -4,7 +4,6 @@ import {
 } from "native-base";
 import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { Divider } from '@rneui/themed';
-import BottomBar from "../Admin Components/BottomBar";
 import { Table, TableWrapper, Row } from 'react-native-table-component-2';
 
 
@@ -118,7 +117,6 @@ export default function AlertDetails({ route }) {
                     </View>
                 }
             </View>
-            <BottomBar />
         </NativeBaseProvider>
     );
 }
