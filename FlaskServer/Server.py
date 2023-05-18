@@ -1,10 +1,13 @@
 import base64
+import cv2
 from flask import Flask, request, jsonify, json
 import mysql.connector
 import requests
 import os
 import datetime
 from datetime import datetime, timedelta
+from PIL import Image
+from io import BytesIO
 
 app = Flask(__name__)
 users = []
@@ -25,14 +28,6 @@ try:
     connection.autocommit(True)
 except Exception as e:
     print(e)
-
-
-def getResponseCount(alertId):
-    query = "SELECT count(*) " "FROM receive " "WHERE receive.alertID = %s;"
-    cursor = connection.cursor()
-    cursor.execute(query, (str(alertId),))
-    records = cursor.fetchall()
-    return int(records[0][0])
 
 
 def getResponseCount(alertId):
@@ -83,10 +78,13 @@ def isAlertUnresolved(id, time):
         return True
     return False
 
-def isUserAlreadyAccepted(userId,alertId):
+
+def isUserAlreadyAccepted(userId, alertId):
     try:
         # check if user already Accepted the alert
-        query = "SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;"
+        query = (
+            "SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;"
+        )
         cursor = connection.cursor()
         cursor.execute(query, (str(userId), str(alertId)))
         records = cursor.fetchall()
@@ -96,7 +94,7 @@ def isUserAlreadyAccepted(userId,alertId):
         return -1
     finally:
         cursor.close()
-    
+
 
 @app.route("/getAlerts", methods=["POST"])
 def getAlerts():
@@ -123,7 +121,7 @@ def getAlerts():
                 item["camId"] = row[1]
                 item["floor"] = row[2]
                 # check if user already Accepted the alert
-                isUserAccepted = isUserAlreadyAccepted(userId,item["alertId"])
+                isUserAccepted = isUserAlreadyAccepted(userId, item["alertId"])
                 if isUserAccepted == 0 | isUserAccepted != -1:
                     item["respondents"] = getResponseCount(item["alertId"])
                     # get image as string and store encoded image
@@ -173,6 +171,7 @@ def handlIncomingAlerts():
     data_json = json.loads(data_str)
     cameraName = data_json["camName"]
     timestamp = data_json["timestamp"]
+    alertImage = data_json["DetectedImage"]
     # Get Camera Information (Id and Floor)
     CamInfo = getCameraInfo(cameraName)
     # No camera Found
@@ -189,16 +188,26 @@ def handlIncomingAlerts():
         # for each logged user send push notification
         for user in users:
             sendPushNotification(user["token"], camID, floor)
+        storeDetectedImg(alertImage, alertId)
         return jsonify(
             {
-                "message": "Data inserted successfully",
-                "alertId": alertId,
+                "message": "Data sent successfully",
                 "result": 1,
             }
         )
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
         return jsonify({"message": e.msg, "result": -1})
+
+
+def storeDetectedImg(imageString, alertID):
+    # decode image
+    image_64_decode = base64.b64decode(imageString)
+    # store image with retuned AlertID
+    filename = str(alertID) + ".jpg"
+    imgFile = open(os.path.join(imageDirectory, filename), "wb")
+    imgFile.write(image_64_decode)
+    imgFile.close()
 
 
 def insertNewAlertRecord():

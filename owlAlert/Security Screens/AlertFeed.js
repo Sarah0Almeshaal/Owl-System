@@ -103,7 +103,6 @@ export default function Feed() {
     const interval = setInterval(() => {
       fetchAlerts();
     }, 5000);
-    // 50000
     return () => {
       Notifications.removeNotificationSubscription(
         notificationListener.current

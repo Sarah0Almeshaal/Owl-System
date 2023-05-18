@@ -5,9 +5,10 @@ from tensorflow import keras
 from keras.models import load_model
 from collections import deque
 import requests
-import os
 import wmi
 import threading
+import time
+import base64
 
 
 class camThread(threading.Thread):
@@ -43,9 +44,6 @@ model = keras.models.load_model(
 
 
 def violenceDetection(camName, camIndex):
-    # save frame in this path
-    output_path_frames = "Saved Frames/"
-
     trueCount = 0  # > Violence frames count
     sendAlert = 0
 
@@ -112,10 +110,14 @@ def violenceDetection(camName, camIndex):
                     # Get current date of detection
                     now = datetime.now()
                     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+                    # Convert detected frame to StingBase64
+                    retval, buffer = cv2.imencode(".jpg", clean_frame)
+                    image_64_encode = base64.b64encode(buffer).decode("utf-8")
                     # information about camera and its floor number and detection timestamp
                     info = {
-                        "camName": camName,
+                        "camName": "cam 1",
                         "timestamp": timestamp,
+                        "DetectedImage": image_64_encode,
                     }
                     # Handle detection's information by calling an API
                     url = "http://127.0.0.1:5000/alert"
@@ -124,20 +126,13 @@ def violenceDetection(camName, camIndex):
                     print(parsed)
                     # store frame with alert as file name
                     if parsed["result"] == 1:
-                        # store image with retuned AlertID
-                        cv2.imwrite(
-                            os.path.join(
-                                output_path_frames, str(parsed["alertId"]) + ".jpg"
-                            ),
-                            clean_frame,
-                        )
-                        # make sure current alert is complete
                         sendAlert = 1
                 except Exception as e:
                     print(e)
-                # refresh to capture new alert
-                sendAlert = 0
-                trueCount = 0
+            # refresh to capture new alert
+            time.sleep(1 * 20)
+            sendAlert = 0
+            trueCount = 0
 
         # if the `q` key was pressed, break from the loop
         if cv2.waitKey(1) & 0xFF == ord("q"):
@@ -145,7 +140,7 @@ def violenceDetection(camName, camIndex):
 
     print("Video recording ends. Release Memory.")
     cam.release()
-    cv2.destroyWindow(str(camName))
+    # cv2.destroyWindow(str(camName))
 
 
 c = wmi.WMI()
