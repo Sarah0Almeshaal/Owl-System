@@ -16,11 +16,12 @@ export default function NoAlertBox() {
 
 const noAlertsBox = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
+    alignSelf: "center",
     justifyContent: "center",
     marginTop: "50%",
+    position: "absolute",
   },
   logo: {
     width: 180,

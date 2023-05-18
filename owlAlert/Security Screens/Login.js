@@ -1,8 +1,24 @@
 import { React, useState } from "react";
+import "../globalVars";
 import {
-  NativeBaseProvider, Box, Center, Image, Stack, Input, InputGroup,
-  InputLeftAddon, Heading, Button, Checkbox, FormControl, VStack, HStack,
-  Text, Alert, Collapse, WarningOutlineIcon,
+  NativeBaseProvider,
+  Box,
+  Center,
+  Image,
+  Stack,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  Heading,
+  Button,
+  Checkbox,
+  FormControl,
+  VStack,
+  HStack,
+  Text,
+  Alert,
+  Collapse,
+  WarningOutlineIcon,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
@@ -15,16 +31,15 @@ async function loginSession(id, type) {
 
 async function checkSession(navigation) {
   try {
-    id = await AsyncStorage.getItem("id")
-    type = await AsyncStorage.getItem("userType")
-    if (id != null && type === "\"Admin\"") {
+    id = await AsyncStorage.getItem("id");
+    type = await AsyncStorage.getItem("userType");
+    if (id != null && type === '"Admin"') {
       navigation.navigate("AdminConatiner");
-    } else if (id != null && type === "\"Security Guard\"") {
+    } else if (id != null && type === '"Security Guard"') {
       navigation.navigate("Alerts");
     }
-  } catch (error) { }
+  } catch (error) {}
 }
-
 
 function LoginPage() {
   const [id, setId] = useState("");
@@ -34,26 +49,27 @@ function LoginPage() {
   const [showError, setShowError] = useState(false);
 
   const navigation = useNavigation();
-  checkSession(navigation)
+  checkSession(navigation);
 
   async function login(id, password, navigation) {
     let token = (await Notifications.getExpoPushTokenAsync()).data;
-    await AsyncStorage.setItem(
-      "ip",
-      JSON.stringify("http://10.10.1.203:5000")
-    );
+    await AsyncStorage.setItem("ip", global.ipFlask);
 
-    fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: id,
-        password: password,
-        token: token,
-      }),
-    }).then((res) => res.json())
+    fetch(
+      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          password: password,
+          token: token,
+        }),
+      }
+    )
+      .then((res) => res.json())
       .then((data) => {
         if (data["result"] === "Security Guard") {
           loginSession(id, "Security Guard");
@@ -76,8 +92,7 @@ function LoginPage() {
       });
       isValid = false;
     } else {
-      setIdErrors({
-      });
+      setIdErrors({});
     }
     if (password === "") {
       setPasswordError({
@@ -85,8 +100,7 @@ function LoginPage() {
       });
       isValid = false;
     } else {
-      setPasswordError({
-      });
+      setPasswordError({});
     }
     if (isValid) {
       setShowError(false);
@@ -222,4 +236,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-

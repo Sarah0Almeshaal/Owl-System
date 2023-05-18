@@ -9,9 +9,13 @@ import MainScreen from "./Admin Screens/MainScreen";
 import CameraSC from "./Admin Screens/CameraSC";
 import AlertHistorySC from "./Admin Screens/AlertHistorySC";
 import AdminConatiner from "./Admin Screens/AdminContainer";
+import { LogBox } from "react-native";
+
+// Ignore all log notifications in development setting:
+LogBox.ignoreAllLogs();
+console.disableYellowBox = true;
 
 const Stack = createStackNavigator();
-
 export default function App() {
   return (
     <NavigationContainer>
@@ -24,10 +28,10 @@ export default function App() {
         <Stack.Screen name="LoginPage" component={LoginPage} />
         <Stack.Screen name="Alerts" component={Feed} />
         <Stack.Screen name="AdminConatiner" component={AdminConatiner} />
-        {/* <Stack.Screen name="MainScreen" component={MainScreen} /> */}
-        {/* <Stack.Screen name="AlertHistorySC" component={AlertHistorySC} /> */}
-        {/* <Stack.Screen name="AlertDetails" component={AlertDetails} /> */}
-        {/* <Stack.Screen name="CameraSC" component={CameraSC} /> */}
+        <Stack.Screen name="MainScreen" component={MainScreen} />
+        <Stack.Screen name="AlertHistorySC" component={AlertHistorySC} />
+        <Stack.Screen name="AlertDetails" component={AlertDetails} />
+        <Stack.Screen name="CameraSC" component={CameraSC} />
       </Stack.Navigator>
     </NavigationContainer>
   );
