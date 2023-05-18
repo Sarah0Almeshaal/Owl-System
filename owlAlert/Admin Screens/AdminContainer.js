@@ -10,12 +10,10 @@ import MainScreen from "./MainScreen";
 import CameraSC from "./CameraSC";
 import AlertHistorySC from "./AlertHistorySC";
 import AlertDetails from "./AlertDetails";
-import ShiftsScreen from "./ShiftSC";
 
 const mainPage = "Home";
 const camera = "Cameras";
 const alertHistory = "Alerts";
-const shifts = "Shifts";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,9 +49,6 @@ function MainContainer() {
                   color={color}
                 />
               );
-            } else if (rn === shifts) {
-              iconName = focused ? "calendar" : "calendar";
-              return <FontAwesome name={iconName} size={size} color={color} />;
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
@@ -77,7 +72,6 @@ function MainContainer() {
         <Tab.Screen name={mainPage} component={MainScreen} />
         <Tab.Screen name={camera} component={CameraSC} />
         <Tab.Screen name={alertHistory} component={AlertHistorySC} />
-        <Tab.Screen name={shifts} component={ShiftsScreen} />
         <Tab.Screen
           name={"alertDetails"}
           component={AlertDetails}
