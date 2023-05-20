@@ -31,7 +31,7 @@ except Exception as e:
 
 
 def getResponseCount(alertId):
-    query = "SELECT count(*) " "FROM receive " "WHERE receive.alertID = %s;"
+    query = "SELECT count(*) " "FROM receive " "WHERE receive.AlertID = %s;"
     cursor = connection.cursor()
     cursor.execute(query, (str(alertId),))
     records = cursor.fetchall()
@@ -83,7 +83,7 @@ def isUserAlreadyAccepted(userId, alertId):
     try:
         # check if user already Accepted the alert
         query = (
-            "SELECT COUNT(*) FROM owlsys.receive WHERE userID = %s AND alertID = %s;"
+            "SELECT COUNT(*) FROM owlsys.receive WHERE UserID = %s AND AlertID = %s;"
         )
         cursor = connection.cursor()
         cursor.execute(query, (str(userId), str(alertId)))
@@ -103,10 +103,10 @@ def getAlerts():
     # get alerts with a pending status
     try:
         select_data = (
-            "SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
+            "SELECT alert.ID as alertId, camera.ID as camId, camera.FloorNum,send.TimeStamp "
             "FROM alert "
-            "INNER JOIN send ON alert.ID=send.alertID "
-            "INNER JOIN camera ON send.camID=camera.Id "
+            "INNER JOIN send ON alert.ID=send.AlertID "
+            "INNER JOIN camera ON send.CamID=camera.ID "
             "WHERE alert.Status = 'pending';"
         )
         cursor = connection.cursor()
@@ -153,7 +153,7 @@ def handleAccept():
 
 def insertNewRecieveRecord(userId, alertId):
     try:
-        insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
+        insert_data = "INSERT INTO receive (UserID,AlertID) VALUES (%s,%s)"
         cursor = connection.cursor()
         cursor.execute(insert_data, (str(userId), str(alertId)))
         connection.commit()
@@ -234,7 +234,7 @@ def insertSendRecord(camID, alertID, timestamp):
         cursor.execute(insert_data, (str(camID), str(alertID), timestamp))
         connection.commit()
     except mysql.connector.Error as e:
-        print(e, flush=True)
+        print(e)
         return -1
     finally:
         cursor.close()
@@ -243,7 +243,7 @@ def insertSendRecord(camID, alertID, timestamp):
 def getCameraInfo(cameraName):
     try:
         # retriveve camera floor and id using camera's name
-        cameraInfoQuery = "SELECT floor, ID FROM CAMERA WHERE cameraName = %s"
+        cameraInfoQuery = "SELECT FloorNum, ID FROM CAMERA WHERE CameraName = %s"
         cameraInfoCursor = connection.cursor()
         cameraInfoCursor.execute(cameraInfoQuery, (cameraName,))
         cameraInfo = cameraInfoCursor.fetchall()
@@ -299,7 +299,7 @@ def login():
     token = user_json["token"]
     try:
         sqlQuery = (
-            "SELECT id, password, type FROM user where  Password='"
+            "SELECT ID, Password, UserType FROM user where  Password='"
             + password
             + "' and id = "
             + str(id)
@@ -346,7 +346,7 @@ def addCamera():
     cameraFloor = content.get("cameraFloor")
     adminId = content.get("adminId")
     try:
-        sqlQuery = "INSERT INTO Camera (Id, floor, user_Id, cameraName) VALUES (%s, %s, %s, %s)"
+        sqlQuery = "INSERT INTO Camera (ID, FloorNum, AdminID, CameraName) VALUES (%s, %s, %s, %s)"
         cursor = connection.cursor()
         cursor.execute(
             sqlQuery, (int(cameraNum), str(cameraFloor), str(adminId), str(camName))
@@ -432,7 +432,7 @@ def getData():
 @app.route("/getAlertLog", methods=["GET"])
 def getAlertLogData():
     try:
-        sqlQuery = "SELECT alert.ID, alert.Status, send.timestamp FROM alert, send WHERE alert.id = send.alertID"
+        sqlQuery = "SELECT alert.ID, alert.Status, send.TimeStamp FROM alert, send WHERE alert.ID = send.AlertID"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         AlertLogRecords = cursor.fetchall()
