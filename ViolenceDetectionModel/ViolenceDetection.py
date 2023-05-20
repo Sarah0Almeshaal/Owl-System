@@ -5,9 +5,11 @@ from tensorflow import keras
 from keras.models import load_model
 from collections import deque
 import requests
-import os
 import wmi
 import threading
+import time
+import base64
+
 
 class camThread(threading.Thread):
     def __init__(self, previewName, camID):
@@ -17,6 +19,7 @@ class camThread(threading.Thread):
 
     def run(self):
         violenceDetection(self.previewName, self.camID)
+
 
 ##################### < Save Video of Violence Method > ######################
 
@@ -30,25 +33,17 @@ def SaveVideo(output_path, W, H):
 
 ##################### < Load Model > ######################
 print("Loading model ...")
-# model = keras.models.load_model('C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Model/modelnew.h5')
 model = keras.models.load_model(
-    'C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Model/modelnew.h5')
+    "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Model/modelnew.h5"
+)
+# model = keras.models.load_model(
+#     "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Model/modelnew.h5"
+# )
 
 ##################### < Violence Detect > ######################
 
 
 def violenceDetection(camName, camIndex):
-    
-    # '0' = webcam , we can change it to MP4 link for testing
-    # input_path = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Videos/V_15.mp4"
-
-    # Save output video file in output_path
-    # output_path ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames/output.avi"
-    # output_path = "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames/output.avi"
-    # save frame in this path
-    # output_path_frames ="C:/Users/jeela/Desktop/VScode workplace/OwlSystem/Violence Detection Model/Saved Frames"
-    output_path_frames = "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames"
-
     trueCount = 0  # > Violence frames count
     sendAlert = 0
 
@@ -62,7 +57,7 @@ def violenceDetection(camName, camIndex):
         grabbed, frame = cam.read()
 
         if not grabbed:
-            print('There is no frame. Streaming ends.')
+            print("There is no frame. Streaming ends.")
             break
 
         if W is None or H is None:
@@ -107,40 +102,45 @@ def violenceDetection(camName, camIndex):
         # show the output frame
         cv2.imshow(str(camName), output)
 
-        if (trueCount == 40):
-            if (sendAlert == 0):
+        if trueCount == 40:
+            if sendAlert == 0:
                 print("Violence Detected!!")
                 # SaveVideo(output_path, W, H)
                 try:
-                    url = 'http://127.0.0.1:5000/getCameraInfo'
-                    cameraInfo = requests.post(url, json={'camName': camName}, verify=False)
-                    response = cameraInfo.json()
                     # Get current date of detection
                     now = datetime.now()
                     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-                    # Handle detection's information by calling an API
+                    # Convert detected frame to StingBase64
+                    retval, buffer = cv2.imencode(".jpg", clean_frame)
+                    image_64_encode = base64.b64encode(buffer).decode("utf-8")
                     # information about camera and its floor number and detection timestamp
-                    info = {'cam': response["id"], 'floor': response["floor"],
-                            'timestamp': timestamp}
-                    url = 'http://127.0.0.1:5000/alert'
+                    info = {
+                        "camName": "cam 1",
+                        "timestamp": timestamp,
+                        "DetectedImage": image_64_encode,
+                    }
+                    # Handle detection's information by calling an API
+                    url = "http://127.0.0.1:5000/alert"
                     response = requests.post(url, json=info, verify=False)
                     parsed = response.json()
                     print(parsed)
                     # store frame with alert as file name
-                    if (parsed['result'] == 1):
-                        cv2.imwrite(os.path.join(output_path_frames, str(
-                            parsed["alertId"])+'.jpg'), clean_frame)
+                    if parsed["result"] == 1:
+                        sendAlert = 1
                 except Exception as e:
                     print(e)
-                sendAlert = 1
+            # refresh to capture new alert
+            time.sleep(1 * 20)
+            sendAlert = 0
+            trueCount = 0
 
-         # if the `q` key was pressed, break from the loop
-        if (cv2.waitKey(1) & 0xFF == ord("q")):
+        # if the `q` key was pressed, break from the loop
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
-    print('Video recording ends. Release Memory.')
+    print("Video recording ends. Release Memory.")
     cam.release()
-    cv2.destroyWindow(str(camName))
+    # cv2.destroyWindow(str(camName))
 
 
 c = wmi.WMI()
@@ -148,7 +148,7 @@ wql = "Select * From Win32_USBControllerDevice"
 camThreads = []
 index = 0
 for item in c.query(wql):
-    if (item.Dependent.PNPClass == "Camera"):
+    if item.Dependent.PNPClass == "Camera":
         camThreads.append(camThread(item.Dependent.Name, index))
         camThreads[index].start()
         index += 1

@@ -14,7 +14,10 @@ import { useNavigation } from "@react-navigation/native";
 
 async function checkSession(navigation) {
   try {
-    if ((await AsyncStorage.getItem("id")) === null || (await AsyncStorage.getItem("userType")) === "\"Admin\"") {
+    if (
+      (await AsyncStorage.getItem("id")) === null ||
+      (await AsyncStorage.getItem("userType")) === '"Admin"'
+    ) {
       navigation.navigate("LoginPage");
     }
   } catch (error) {}
@@ -81,11 +84,7 @@ export default function Feed() {
   const notificationListener = useRef();
   const responseListener = useRef();
   const navigation = useNavigation();
-  checkSession(navigation)
-
-  const myListEmpty = () => {
-    return <NoAlertBox />;
-  };
+  checkSession(navigation);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
@@ -104,7 +103,6 @@ export default function Feed() {
     const interval = setInterval(() => {
       fetchAlerts();
     }, 5000);
-    // 50000
     return () => {
       Notifications.removeNotificationSubscription(
         notificationListener.current
@@ -159,10 +157,10 @@ export default function Feed() {
     <View style={styles.main}>
       <TopHeader />
       <SafeAreaView style={styles.container}>
+        <NoAlertBox />
         <FlatList
           style={styles.scrollView}
           data={alertsObject}
-          ListEmptyComponent={myListEmpty}
           extraData={alertsObject}
           renderItem={({ item }) => (
             <AlertBox
@@ -188,7 +186,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-
   container: {
     flex: 1,
     backgroundColor: "#fff",
