@@ -367,11 +367,11 @@ def getAlertRecord():
         alerts = cursor.fetchall()
         alertList = []
 
-        sqlQueryResolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'resolved' AND DATE(timestamp) = curdate();"
+        sqlQueryResolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryResolved)
         resolved = cursor.fetchone()
 
-        sqlQueryUnresolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'unresolved' AND DATE(timestamp) = curdate();"
+        sqlQueryUnresolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryUnresolved)
         unresolved = cursor.fetchone()
 
@@ -412,7 +412,7 @@ def deleteCamera():
 @app.route("/getCamerasData", methods=["GET"])
 def getData():
     try:
-        sqlQuery = "SELECT id, floor FROM CAMERA"
+        sqlQuery = "SELECT id, floornum FROM CAMERA"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         camerasRecords = cursor.fetchall()
@@ -474,7 +474,7 @@ def alertDetails():
         content = request.json
         alertId = content.get("alertId")
 
-        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
+        alertDetailsQuery = """SELECT owlsys.alert.ID, Status, timestamp, owlsys.camera.Id, floornum FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
         detailsCursor = connection.cursor()
         detailsCursor.execute(alertDetailsQuery, (alertId,))
         details = detailsCursor.fetchone()
@@ -486,12 +486,7 @@ def alertDetails():
         respondents = []
 
         try:
-            path = (
-                "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames/"
-                + str(alertId)
-                + ".jpg"
-            )
-            with open(path, "rb") as image_file:
+            with open(imageDirectory, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
         except FileNotFoundError as e:
             print(e)
