@@ -89,7 +89,7 @@ export default function Feed() {
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token)
+      setExpoPushToken(token),
     );
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
