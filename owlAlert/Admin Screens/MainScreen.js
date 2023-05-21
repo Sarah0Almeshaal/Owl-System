@@ -27,7 +27,7 @@ async function checkSession(navigation) {
     if ((await AsyncStorage.getItem("id")) === null) {
       navigation.navigate("LoginPage");
     }
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export default function MainScreen() {
@@ -41,7 +41,7 @@ export default function MainScreen() {
   let alertList = [];
   let alertDetails;
   useEffect(() => {
-    fetch("http://10.10.1.203:5000/getAlertRecord")
+    fetch(global.ipFlask + "/getAlertRecord")
       .then((res) => res.json())
       .then((data) => {
         if (data["alerts"] != 0) {

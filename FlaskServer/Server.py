@@ -17,9 +17,9 @@ numberOfAccept = int(len(users) / 2)
 
 
 # Used for image search and retrieval
-imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Saved Frames/"
+# imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Violence Image/"
 
-# imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Saved Frames/"
+imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Violence Image/"
 
 try:
     connection = mysql.connector.connect(
@@ -103,7 +103,7 @@ def getAlerts():
     # get alerts with a pending status
     try:
         select_data = (
-            "SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
+            "SELECT alert.ID as alertId, camera.Id as camId, camera.floornum, send.timestamp "
             "FROM alert "
             "INNER JOIN send ON alert.ID=send.alertID "
             "INNER JOIN camera ON send.camID=camera.Id "
@@ -153,7 +153,7 @@ def handleAccept():
 
 def insertNewRecieveRecord(userId, alertId):
     try:
-        insert_data = "INSERT INTO receive (userID,alertID) VALUES (%s,%s)"
+        insert_data = "INSERT INTO receive (UserID,AlertID) VALUES (%s,%s)"
         cursor = connection.cursor()
         cursor.execute(insert_data, (str(userId), str(alertId)))
         connection.commit()
@@ -243,7 +243,7 @@ def insertSendRecord(camID, alertID, timestamp):
 def getCameraInfo(cameraName):
     try:
         # retriveve camera floor and id using camera's name
-        cameraInfoQuery = "SELECT floor, ID FROM CAMERA WHERE cameraName = %s"
+        cameraInfoQuery = "SELECT floornum, ID FROM CAMERA WHERE cameraName = %s"
         cameraInfoCursor = connection.cursor()
         cameraInfoCursor.execute(cameraInfoQuery, (cameraName,))
         cameraInfo = cameraInfoCursor.fetchall()
@@ -299,7 +299,7 @@ def login():
     token = user_json["token"]
     try:
         sqlQuery = (
-            "SELECT id, password, type FROM user where  Password='"
+            "SELECT id, password, usertype FROM user where  Password='"
             + password
             + "' and id = "
             + str(id)
@@ -346,7 +346,7 @@ def addCamera():
     cameraFloor = content.get("cameraFloor")
     adminId = content.get("adminId")
     try:
-        sqlQuery = "INSERT INTO Camera (Id, floor, user_Id, cameraName) VALUES (%s, %s, %s, %s)"
+        sqlQuery = "INSERT INTO Camera (Id, floornum, adminid, cameraName) VALUES (%s, %s, %s, %s)"
         cursor = connection.cursor()
         cursor.execute(
             sqlQuery, (int(cameraNum), str(cameraFloor), str(adminId), str(camName))
@@ -361,17 +361,20 @@ def addCamera():
 @app.route("/getAlertRecord", methods=["GET"])
 def getAlertRecord():
     try:
-        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
+        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter"
+        "FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         alerts = cursor.fetchall()
         alertList = []
 
-        sqlQueryResolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'resolved' AND DATE(timestamp) = curdate();"
+        sqlQueryResolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send "
+        "ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryResolved)
         resolved = cursor.fetchone()
 
-        sqlQueryUnresolved = "SELECT alertID, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.id WHERE Status = 'unresolved' AND DATE(timestamp) = curdate();"
+        sqlQueryUnresolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send "
+        "ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryUnresolved)
         unresolved = cursor.fetchone()
 
@@ -412,7 +415,7 @@ def deleteCamera():
 @app.route("/getCamerasData", methods=["GET"])
 def getData():
     try:
-        sqlQuery = "SELECT id, floor FROM CAMERA"
+        sqlQuery = "SELECT id, floornum FROM CAMERA"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         camerasRecords = cursor.fetchall()
@@ -474,7 +477,7 @@ def alertDetails():
         content = request.json
         alertId = content.get("alertId")
 
-        alertDetailsQuery = """SELECT alertID, Status, timestamp, owlsys.camera.Id, floor FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
+        alertDetailsQuery = """SELECT owlsys.alert.ID, Status, timestamp, owlsys.camera.Id, floornum FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
         detailsCursor = connection.cursor()
         detailsCursor.execute(alertDetailsQuery, (alertId,))
         details = detailsCursor.fetchone()
@@ -486,12 +489,7 @@ def alertDetails():
         respondents = []
 
         try:
-            path = (
-                "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Saved Frames/"
-                + str(alertId)
-                + ".jpg"
-            )
-            with open(path, "rb") as image_file:
+            with open(imageDirectory, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
         except FileNotFoundError as e:
             print(e)

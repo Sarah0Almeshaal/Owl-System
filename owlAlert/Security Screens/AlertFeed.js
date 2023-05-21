@@ -70,6 +70,7 @@ getData = async () => {
     const value = await AsyncStorage.getItem("id");
     if (value !== null) {
       userId = JSON.parse(value);
+      console.log(value)
     }
   } catch (e) {
     console.log(e);
@@ -114,7 +115,7 @@ export default function Feed() {
 
   fetchAlerts = async () => {
     fetch(
-      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") +
+      global.ipFlask +
         "/getAlerts",
       {
         method: "post",

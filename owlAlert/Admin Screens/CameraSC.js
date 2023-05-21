@@ -19,7 +19,7 @@ function CameraSC() {
   const to = Math.min((page + 1) * numberOfItemsPerPage, items.length);
 
   async function deleteCamera(cameraNum) {
-    fetch("http://10.10.1.203:5000" + "/deleteCamera", {
+    fetch(global.ipFlask + "/deleteCamera", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +55,7 @@ function CameraSC() {
   }, []);
 
   const getCamerasData = () => {
-    fetch(flaskAPI, {
+    fetch(global.ipFlask + "/getCamerasData", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

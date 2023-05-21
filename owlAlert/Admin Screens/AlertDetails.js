@@ -15,7 +15,7 @@ export default function AlertDetails({ route }) {
     let respondentsList = []
 
     useEffect(() => {
-        fetch("http://10.10.1.203:5000/alertDetails", {
+        fetch(global.ipFlask + "/alertDetails", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export default function AlertDetails({ route }) {
                 <Heading size={"sm"} ml="15px" >
                     Alert Details
                 </Heading>
-                <Image source={{uri: `data:image/jpg;base64,${alert.image}`}} alt="Alert Image" width={170} height={170} />
+                <Image source={{ uri: `data:image/jpg;base64,${alert.image}` }} alt="Alert Image" width={170} height={170} />
                 <Text style={styles.info}>Status: <Text style={{ fontWeight: "bold", color: statusColorId() }}>{alert.status}</Text> </Text>
                 <HStack space={"39%"}>
                     <Text style={styles.info}>Floor: {alert.floor}</Text>

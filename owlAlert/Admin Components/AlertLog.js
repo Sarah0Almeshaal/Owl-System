@@ -18,7 +18,7 @@ const AlertLog = () => {
   }, []);
 
   const getAlertLogData = () => {
-    fetch(flaskAPI, {
+    fetch(global.ipFlask + "/getAlertLog", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -21,7 +21,7 @@ const AddCamera = ({ handleCallback }) => {
     async function getCameraId() {
         setModalVisible(true);
         fetch(
-            String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/getLastCamera",
+            global.ipFlask + "/getLastCamera",
             {
                 method: "GET",
                 headers: {
@@ -41,7 +41,7 @@ const AddCamera = ({ handleCallback }) => {
     let cameraInfo = { cameraNum: cameraNum, cameraFloor: floor["value"], camName: "cam " + cameraNum };
 
     async function addCamera(cameraInfo) {
-        fetch(String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/addCamera", {
+        fetch(global.ipFlask + "/addCamera", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

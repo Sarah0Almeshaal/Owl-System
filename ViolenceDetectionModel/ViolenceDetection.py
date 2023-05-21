@@ -33,12 +33,8 @@ def SaveVideo(output_path, W, H):
 
 ##################### < Load Model > ######################
 print("Loading model ...")
-model = keras.models.load_model(
-    "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Model/modelnew.h5"
-)
-# model = keras.models.load_model(
-#     "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Model/modelnew.h5"
-# )
+# model = keras.models.load_model("C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Model/modelnew.h5")
+model = keras.models.load_model("C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Model/modelnew.h5")
 
 ##################### < Violence Detect > ######################
 

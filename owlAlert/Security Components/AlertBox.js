@@ -15,7 +15,7 @@ export default function AlertBox({
 }) {
   postResponse = async (type, user_id, alert_id) => {
     fetch(
-      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + `/${type}`,
+      global.ipFlask + `/${type}`,
       {
         method: "post",
         headers: {

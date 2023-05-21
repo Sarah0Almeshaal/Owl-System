@@ -11,7 +11,7 @@ import AlertHistorySC from "./Admin Screens/AlertHistorySC";
 import AdminConatiner from "./Admin Screens/AdminContainer";
 import { LogBox } from "react-native";
 
-// Ignore all log notifications in development setting:
+// Ignore all log notifications in development environment:
 LogBox.ignoreAllLogs();
 console.disableYellowBox = true;
 

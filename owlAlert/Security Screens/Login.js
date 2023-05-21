@@ -56,7 +56,7 @@ function LoginPage() {
     await AsyncStorage.setItem("ip", global.ipFlask);
 
     fetch(
-      String(await AsyncStorage.getItem("ip")).replace(/["]/g, "") + "/login",
+      global.ipFlask + "/login",
       {
         method: "POST",
         headers: {
