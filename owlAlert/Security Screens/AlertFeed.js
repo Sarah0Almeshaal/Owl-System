@@ -64,18 +64,18 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-let userId = 0;
+let userId;
 getData = async () => {
   try {
     const value = await AsyncStorage.getItem("id");
     if (value !== null) {
       userId = JSON.parse(value);
+      print(userId);
     }
   } catch (e) {
     console.log(e);
   }
 };
-getData();
 export default function Feed() {
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
@@ -85,7 +85,7 @@ export default function Feed() {
   const responseListener = useRef();
   const navigation = useNavigation();
   checkSession(navigation);
-
+  getData();
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)

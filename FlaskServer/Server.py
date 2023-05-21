@@ -17,9 +17,9 @@ numberOfAccept = int(len(users) / 2)
 
 
 # Used for image search and retrieval
-imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Saved Frames/"
+imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Violence Image/"
 
-# imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Saved Frames/"
+# imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Violence Image/"
 
 try:
     connection = mysql.connector.connect(
@@ -141,6 +141,7 @@ def handleAccept():
         content = request.json
         alertId = content.get("alertId")
         userId = content.get("userId")
+        print("user id is",userId)
         if insertNewRecieveRecord(userId, alertId) == -1:
             return jsonify({"message": "error inserting recieve record", "result": -1})
         # change alert status depending on How many Accept needed for it to change
