@@ -19,7 +19,7 @@ numberOfAccept = int(len(users) / 2)
 # Used for image search and retrieval
 # imageDirectory = "C:/Users/jeela/Desktop/VScode workplace/OwlSystem/ViolenceDetectionModel/Violence Image/"
 
-imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL 10/CPIT - 499/The Owl System/Violence Image/"
+imageDirectory = "C:/Users/Sara_/Desktop/FCIT/LVL10/CPIT-499/TheOwlSystem/Owl-System/ViolenceDetectionModel/Violence Image/"
 
 try:
     connection = mysql.connector.connect(
@@ -103,7 +103,7 @@ def getAlerts():
     # get alerts with a pending status
     try:
         select_data = (
-            "SELECT alert.ID as alertId, camera.Id as camId, camera.floor,send.timestamp "
+            "SELECT alert.ID as alertId, camera.Id as camId, camera.FloorNum,send.timestamp "
             "FROM alert "
             "INNER JOIN send ON alert.ID=send.AlertID "
             "INNER JOIN camera ON send.CamID=camera.ID "
@@ -244,7 +244,7 @@ def insertSendRecord(camID, alertID, timestamp):
 def getCameraInfo(cameraName):
     try:
         # retriveve camera floor and id using camera's name
-        cameraInfoQuery = "SELECT floor, ID FROM CAMERA WHERE cameraName = %s"
+        cameraInfoQuery = "SELECT FloorNum, ID FROM CAMERA WHERE cameraName = %s"
         cameraInfoCursor = connection.cursor()
         cameraInfoCursor.execute(cameraInfoQuery, (cameraName,))
         cameraInfo = cameraInfoCursor.fetchall()
