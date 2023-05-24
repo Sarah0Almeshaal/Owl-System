@@ -126,7 +126,7 @@ def violenceDetection(camName, camIndex):
                 except Exception as e:
                     print(e)
             # refresh to capture new alert
-            time.sleep(1 * 20)
+            time.sleep(1 * 60)
             sendAlert = 0
             trueCount = 0
 

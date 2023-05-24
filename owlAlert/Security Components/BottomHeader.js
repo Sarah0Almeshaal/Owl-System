@@ -4,9 +4,8 @@ import { StyleSheet, View, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-async function logout(navigation) {
-  navigation.navigate("LoginPage")
-  await AsyncStorage.removeItem("id")
+function logout(navigation) {
+  AsyncStorage.removeItem("id").then(() => navigation.navigate("LoginPage"));
 }
 
 export default function BottomHeader() {
@@ -15,7 +14,7 @@ export default function BottomHeader() {
   return (
     <View style={feed.headerBottom}>
       <TouchableOpacity onPress={() => logout(navigation)}>
-        <Image source={require("../assets/logout.png")}/>
+        <Image source={require("../assets/logout.png")} />
       </TouchableOpacity>
     </View>
   );
