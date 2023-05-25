@@ -70,8 +70,6 @@ getData = async () => {
     const value = await AsyncStorage.getItem("id");
     if (value !== null) {
       userId = JSON.parse(value);
-      print(userId);
-      console.log(value)
     }
   } catch (e) {
     console.log(e);

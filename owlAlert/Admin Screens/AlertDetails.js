@@ -15,13 +15,13 @@ export default function AlertDetails({ route }) {
     let respondentsList = []
 
     useEffect(() => {
-        fetch(global.ipFlask + "/alertDetails", {
+        fetch( global.ipFlask + "/alertDetails", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                alertId: alertNum
+                "alertId": alertNum
             }),
         }).then((res) => res.json())
             .then((data) => {
@@ -53,15 +53,15 @@ export default function AlertDetails({ route }) {
             }).catch((error) => {
                 console.error(error);
             });
-    }, [])
+    }, [alertNum])
 
     function statusColorId() {
-        if (alert.status === "resolved") {
-            return statusColor = "#0099DA"
-        } else if (alert.status === "pending") {
-            return statusColor = "#FFB302"
-        } else if (alert.status === "unresolved") {
-            return statusColor = "#FF4545"
+        if (alert.status === "Resolved") {
+            return "#0099DA"
+        } else if (alert.status === "Pending") {
+            return "#FFB302"
+        } else if (alert.status === "Unresolved") {
+            return "#FF4545"
         }
     }
 
@@ -74,9 +74,6 @@ export default function AlertDetails({ route }) {
                 <Divider style={{ width: "15%" }} width={"2"} color="#0785F9" inset={true} insetType="right" />
             </VStack>
             <VStack safeAreaTop="5" safeAreaLeft="2" space={"2"}>
-                <Heading size={"sm"} ml="15px" >
-                    Alert Details
-                </Heading>
                 <Image source={{ uri: `data:image/jpg;base64,${alert.image}` }} alt="Alert Image" width={170} height={170} />
                 <Text style={styles.info}>Status: <Text style={{ fontWeight: "bold", color: statusColorId() }}>{alert.status}</Text> </Text>
                 <HStack space={"39%"}>

@@ -362,18 +362,17 @@ def addCamera():
 @app.route("/getAlertRecord", methods=["GET"])
 def getAlertRecord():
     try:
-        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter"
-        "FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE)"
+        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE);"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         alerts = cursor.fetchall()
         alertList = []
 
-        sqlQueryResolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();"
+        sqlQueryResolved = "SELECT alertid, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryResolved)
         resolved = cursor.fetchone()
 
-        sqlQueryUnresolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.id = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();"
+        sqlQueryUnresolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();"
         cursor.execute(sqlQueryUnresolved)
         unresolved = cursor.fetchone()
 
@@ -488,23 +487,16 @@ def alertDetails():
         respondentRecord = respondentsCursor.fetchall()
         respondents = []
 
-        try:
-            with open(imageDirectory, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-        except FileNotFoundError as e:
-            print(e)
-
         if detailsCursor.rowcount > 0:
             date = details[2].strftime("%Y-%m-%d")
             time = details[2].strftime("%H:%M:%S")
-            print(details[1])
             alertDetails = {
                 "status": details[1],
                 "date": date,
                 "time": time,
                 "camId": details[3],
                 "floor": details[4],
-                "image": encoded_string,
+                "image": getAlertImage(alertId),
             }
 
             for record in respondentRecord:

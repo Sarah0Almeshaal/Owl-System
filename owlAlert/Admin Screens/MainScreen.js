@@ -16,10 +16,13 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ContributionGraph } from "react-native-chart-kit";
 import { Dimensions, SafeAreaView, View } from "react-native";
+import App from '../App'
 
 async function logout(navigation) {
-  navigation.navigate("LoginPage");
-  await AsyncStorage.removeItem("id");
+  // navigation.navigate("LoginPage");
+  // await AsyncStorage.removeItem("id");
+  AsyncStorage.removeItem("id").then(() => navigation.navigate(App , { screen: 'LoginPage' }));
+
 }
 
 async function checkSession(navigation) {

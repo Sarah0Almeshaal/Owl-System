@@ -13,7 +13,7 @@ import LoginPage from "../Security Screens/Login";
 
 const mainPage = "Home";
 const camera = "Cameras";
-const alertHistory = "Alerts";
+const alertHistory = "Alert Log";
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +64,7 @@ function MainContainer() {
             paddingBottom: 10,
             width: 350,
             borderRadius: 15,
-            left: 14,
+            alignSelf: "center",
             bottom: 10,
           },
         })}
@@ -80,14 +80,14 @@ function MainContainer() {
             tabBarVisible: false,
           }}
         />
-            <Tab.Screen
+        {/* <Tab.Screen
           name={"LoginPage"}
           component={LoginPage}
           options={{
             tabBarButton: () => null,
             tabBarVisible: false,
           }}
-        />
+        /> */}
       </Tab.Navigator>
     </NavigationContainer>
   );

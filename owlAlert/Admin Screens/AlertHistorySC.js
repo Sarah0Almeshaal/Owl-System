@@ -12,7 +12,6 @@ function AlertHistorySC() {
         <Text style={styles.pageTitle}>Alert History</Text>
         <View style={styles.line} />
         <View style={styles.box}>
-          <Text style={styles.title}>Alert Log </Text>
           {active === "AlertLog" && <AlertLog />}
         </View>
       </View>
