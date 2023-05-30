@@ -28,10 +28,6 @@ export default function App() {
         <Stack.Screen name="LoginPage" component={LoginPage} />
         <Stack.Screen name="Alerts" component={Feed} />
         <Stack.Screen name="AdminConatiner" component={AdminConatiner} />
-        {/* <Stack.Screen name="MainScreen" component={MainScreen} />
-        <Stack.Screen name="AlertHistorySC" component={AlertHistorySC} />
-        <Stack.Screen name="AlertDetails" component={AlertDetails} />
-        <Stack.Screen name="CameraSC" component={CameraSC} />  */}
       </Stack.Navigator>
     </NavigationContainer>
   );

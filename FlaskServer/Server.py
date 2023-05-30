@@ -297,6 +297,7 @@ def login():
     id = user_json["id"]
     password = user_json["password"]
     token = user_json["token"]
+  
     try:
         sqlQuery = (
             "SELECT ID, Password, UserType FROM user where  Password='"
@@ -316,7 +317,7 @@ def login():
                 users.append(user)
             return jsonify({"result": "Security Guard"})
         else:
-            return jsonify({"result": -1})
+            return jsonify({"result": "Incorrect login credential"})
 
     except mysql.connector.Error as e:
         print("Error reading data from MySQL table", e)
@@ -352,10 +353,10 @@ def addCamera():
             sqlQuery, (int(cameraNum), str(cameraFloor), str(adminId), str(camName))
         )
         connection.commit()
-        return jsonify({"result": 1})
+        return jsonify({"result": "Camera is successfully added"})
     except mysql.connector.Error as e:
         print("Error inserting data into MySQL table", e)
-        return jsonify({"result": -1})
+        return jsonify({"result": "Process was unsuccessful"})
 
 
 @app.route("/getAlertRecord", methods=["GET"])
