@@ -1,20 +1,25 @@
 import { NativeBaseProvider } from "native-base";
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { DataTable, IconButton, MD3Colors } from "react-native-paper";
 import { HStack, Center, Box, Slide, CheckIcon } from "native-base";
 import AddCamera from "../Admin Components/AddCamera";
 
 function CameraSC() {
-
   const [page, setPage] = useState(0);
   const [numberOfItemsPerPage, onItemsPerPageChange] = useState(6);
   const from = page * numberOfItemsPerPage;
   const [items, setItems] = useState([]);
   const [itemId, setItemId] = useState("");
   const [confirmMsg, setConfirmMsg] = useState(false);
-  const [actionMsg, setActionMsg] = useState("")
-
+  const [actionMsg, setActionMsg] = useState("");
 
   const to = Math.min((page + 1) * numberOfItemsPerPage, items.length);
 
@@ -25,31 +30,37 @@ function CameraSC() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        cameraNum: cameraNum
+        cameraNum: cameraNum,
       }),
     })
       .then((res) => res.json())
       .then((data) => {
         if (data["result"] === 1) {
-          handleDeleteClick(itemId)
+          handleDeleteClick(itemId);
         } else {
-          console.log("ERROR")
+          console.log("ERROR");
         }
       })
       .catch((err) => console.log(err));
+    getCamerasData();
   }
 
   function createAlert(itemId) {
-    Alert.alert('Delete Camera', "This will remove all data relating to camera " + itemId + "." + " This action cannot be reversed.", [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      { text: 'OK', onPress: () => deleteCamera(itemId) },
-    ]);
+    Alert.alert(
+      "Delete Camera",
+      "This will remove all data relating to camera " +
+        itemId +
+        "." +
+        " This action cannot be reversed.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        { text: "OK", onPress: () => deleteCamera(itemId) },
+      ]
+    );
   }
-
-  const flaskAPI = "http://10.10.1.203:5000//getCamerasData";
   useEffect(() => {
     getCamerasData();
   }, []);
@@ -78,36 +89,31 @@ function CameraSC() {
   }, [numberOfItemsPerPage]);
 
   const handleDeleteClick = (itemId) => {
-    const newItems = [...items];
-    const index = items.findIndex((item) => item.id === itemId);
-    newItems.splice(index, 1);
-    setItems(newItems);
-    setConfirmMsg(true)
+    setConfirmMsg(true);
     setTimeout(() => {
-      setConfirmMsg(false)
-    }, 10000)
-    setActionMsg("Camera is deleted successfully")
+      setConfirmMsg(false);
+    }, 10000);
+    setActionMsg("Camera is deleted successfully");
   };
 
   const handleAddCamera = (cameraInfo) => {
     const newItems = [...items];
-    newItems.push(cameraInfo)
-    setItems(newItems)
-    setConfirmMsg(true)
+    newItems.push(cameraInfo);
+    setItems(newItems);
+    setConfirmMsg(true);
     setTimeout(() => {
-      setConfirmMsg(false)
-    }, 10000)
-    setActionMsg("Camera is added successfully")
+      setConfirmMsg(false);
+    }, 10000);
+    setActionMsg("Camera is added successfully");
   };
 
-
   let tableRoww = (item) => (
-    <DataTable.Row key={item.id} >
+    <DataTable.Row key={item.id}>
       <DataTable.Cell>{item.id}</DataTable.Cell>
       <DataTable.Cell>{item.floor}</DataTable.Cell>
-      <DataTable.Cell style={{ flex: 0.5 }} >
+      <DataTable.Cell style={{ flex: 0.5 }}>
         <View style={styles.container}>
-          <TouchableOpacity >
+          <TouchableOpacity>
             <IconButton
               icon="delete-forever"
               iconColor={MD3Colors.error50}
@@ -135,7 +141,9 @@ function CameraSC() {
               <DataTable>
                 <DataTable.Header>
                   <DataTable.Title>ID</DataTable.Title>
-                  <DataTable.Title style={{ paddingRight: 60 }}>Floor</DataTable.Title>
+                  <DataTable.Title style={{ paddingRight: 60 }}>
+                    Floor
+                  </DataTable.Title>
                 </DataTable.Header>
                 {items
                   .slice(
@@ -156,11 +164,17 @@ function CameraSC() {
             </View>
           </View>
         </View>
-        {confirmMsg === true ?
+        {confirmMsg === true ? (
           <Center>
-            {confirmMsg === true ?
-              <ConfirmMsgComponent action={actionMsg} open={confirmMsg} /> : <View></View>}
-          </Center> : <View></View>}
+            {confirmMsg === true ? (
+              <ConfirmMsgComponent action={actionMsg} open={confirmMsg} />
+            ) : (
+              <View></View>
+            )}
+          </Center>
+        ) : (
+          <View></View>
+        )}
       </SafeAreaView>
     </NativeBaseProvider>
   );
@@ -199,10 +213,12 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontSize: 20,
     fontWeight: "bold",
+    marginTop: 20,
   },
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
+    
   },
   button: {
     padding: 8,
@@ -218,24 +234,46 @@ const styles = StyleSheet.create({
 
 const ConfirmMsgComponent = ({ action, open }) => {
   const [isOpen, setIsOpen] = React.useState(open);
-  return <Center>
-    {open === true ?
-      useEffect(() => {
-        setTimeout(() => {
-          setIsOpen(!isOpen)
-        }, 10000)
-      }, []) : <View></View>}
+  return (
+    <Center>
+      {open === true ? (
+        useEffect(() => {
+          setTimeout(() => {
+            setIsOpen(!isOpen);
+          }, 10000);
+        }, [])
+      ) : (
+        <View></View>
+      )}
 
-    {isOpen === true ?
-      <Center>
-        <Slide in={isOpen} placement="top">
-          <Box w="85%" bgColor={"emerald.100"} h={"55px"} alignItems="center" margin={"35px"} padding={"15px"} borderRadius="20px">
-            <HStack space={2}>
-              <CheckIcon size="4" color="emerald.600" mt="1" />
-              <Text color="emerald.600" textAlign="center" fontWeight="medium">{action}</Text>
-            </HStack>
-          </Box>
-        </Slide>
-      </Center> : <View></View>}
-  </Center>
+      {isOpen === true ? (
+        <Center>
+          <Slide in={isOpen} placement="top">
+            <Box
+              w="85%"
+              bgColor={"emerald.100"}
+              h={"55px"}
+              alignItems="center"
+              margin={"35px"}
+              padding={"15px"}
+              borderRadius="20px"
+            >
+              <HStack space={2}>
+                <CheckIcon size="4" color="emerald.600" mt="1" />
+                <Text
+                  color="emerald.600"
+                  textAlign="center"
+                  fontWeight="medium"
+                >
+                  {action}
+                </Text>
+              </HStack>
+            </Box>
+          </Slide>
+        </Center>
+      ) : (
+        <View></View>
+      )}
+    </Center>
+  );
 };

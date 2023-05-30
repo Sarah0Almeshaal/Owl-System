@@ -12,8 +12,7 @@ from io import BytesIO
 app = Flask(__name__)
 users = []
 unresolvedTimeInMinutes = 7
-# average Number of users
-numberOfAccept = int(len(users) / 2)
+
 
 
 # Used for image search and retrieval
@@ -40,7 +39,7 @@ def getResponseCount(alertId):
 
 def isResolved(alertId):
     # check if counter equals to specified number (considered resolved)
-    if getResponseCount(alertId) >= numberOfAccept:
+    if getResponseCount(alertId) >= (int(len(users) / 2)):
         try:
             # update alert table alert.status = reolved
             query = "UPDATE alert SET Status = 'Resolved' WHERE alert.ID = %s;"
@@ -508,7 +507,6 @@ def alertDetails():
     except mysql.connector.Error as e:
         print("Error retrieving data into MySQL table", e)
         return jsonify({"result": -1})
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

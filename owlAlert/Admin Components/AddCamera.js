@@ -144,12 +144,14 @@ const cameraStyles = StyleSheet.create({
         padding: 10,
         width: 80,
         backgroundColor: '#0785F9',
+        
     },
     centeredView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 22,
+        paddingLeft: 50,
     },
     modalView: {
         margin: 20,

@@ -16,26 +16,25 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ContributionGraph } from "react-native-chart-kit";
 import { Dimensions, SafeAreaView, View } from "react-native";
-import App from '../App'
+import MainContainer from "./AdminContainer";
 
 async function logout(navigation) {
   // navigation.navigate("LoginPage");
-  // await AsyncStorage.removeItem("id");
-  AsyncStorage.removeItem("id").then(() => navigation.navigate(App , { screen: 'LoginPage' }));
-
+  await AsyncStorage.removeItem("id");
 }
 
-async function checkSession(navigation) {
-  try {
-    if ((await AsyncStorage.getItem("id")) === null) {
-      navigation.navigate("LoginPage");
-    }
-  } catch (error) { }
-}
+// async function checkSession(navigation) {
+//   try {
+//     if ((await AsyncStorage.getItem("id")) === null) {
+//       navigation.navigate("LoginPage");
+//     }
+//   } catch (error) {}
+// }
 
 export default function MainScreen() {
   const navigation = useNavigation();
-  checkSession(navigation);
+  // checkSession(navigation);
+  console.log("HERE!")
   const screenWidth = Dimensions.get("window").width;
   const [alerts, setAlerts] = useState([]);
   const [resolved, setResolved] = useState(0);
@@ -43,7 +42,18 @@ export default function MainScreen() {
 
   let alertList = [];
   let alertDetails;
+
   useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAlertRecord();
+    }, 500000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [alertList]);
+
+  fetchAlertRecord = async () => {
     fetch(global.ipFlask + "/getAlertRecord")
       .then((res) => res.json())
       .then((data) => {
@@ -70,8 +80,7 @@ export default function MainScreen() {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
-
+  };
   const chartConfig = {
     backgroundGradientFrom: "#F2F2F2",
     backgroundGradientFromOpacity: 0,
@@ -145,6 +154,7 @@ export default function MainScreen() {
             backgroundColor={"transparent"}
           />
         </Center>
+        <MainContainer />
       </SafeAreaView>
     </NativeBaseProvider>
   );

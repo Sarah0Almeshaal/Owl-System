@@ -30,6 +30,8 @@ async function loginSession(id, type) {
 }
 
 async function checkSession(navigation) {
+  await AsyncStorage.removeItem("id");
+
   try {
     id = await AsyncStorage.getItem("id");
     type = await AsyncStorage.getItem("userType");

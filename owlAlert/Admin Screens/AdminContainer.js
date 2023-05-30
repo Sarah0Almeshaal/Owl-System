@@ -9,7 +9,7 @@ import MainScreen from "./MainScreen";
 import CameraSC from "./CameraSC";
 import AlertHistorySC from "./AlertHistorySC";
 import AlertDetails from "./AlertDetails";
-import LoginPage from "../Security Screens/Login";
+import App from "../App";
 
 const mainPage = "Home";
 const camera = "Cameras";
@@ -82,7 +82,7 @@ function MainContainer() {
         />
         {/* <Tab.Screen
           name={"LoginPage"}
-          component={LoginPage}
+          component={App}
           options={{
             tabBarButton: () => null,
             tabBarVisible: false,
