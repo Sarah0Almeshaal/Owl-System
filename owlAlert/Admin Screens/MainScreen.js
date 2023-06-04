@@ -135,7 +135,7 @@ export default function MainScreen() {
               rounded={"3xl"}
               size="xs"
               ml="20"
-              onPress={() => navigation.navigate("Alerts")}
+              onPress={() => navigation.navigate("Alert Log")}
             >
               View More
             </Button>

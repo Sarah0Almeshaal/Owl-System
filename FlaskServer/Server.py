@@ -11,7 +11,7 @@ from io import BytesIO
 
 app = Flask(__name__)
 users = []
-unresolvedTimeInMinutes = 7
+unresolvedTimeInMinutes = 2
 
 
 
@@ -46,6 +46,7 @@ def isResolved(alertId):
             cursor = connection.cursor()
             cursor.execute(query, (str(alertId),))
             connection.commit()
+            print((int(len(users) / 2)))
         except mysql.connector.Error as e:
             print(e)
             return -1

@@ -14,8 +14,14 @@ const AlertLog = () => {
   const flaskAPI = "http://10.10.1.203:5000/getAlertLog";
 
   useEffect(() => {
-    getAlertLogData();
-  }, []);
+    const interval = setInterval(() => {
+      getAlertLogData();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [items]);
 
   const getAlertLogData = () => {
     fetch(global.ipFlask + "/getAlertLog", {
