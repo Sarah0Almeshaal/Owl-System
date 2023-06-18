@@ -1,2 +1,2 @@
 # Owl-System
-The Senior Project of Awesome Group M14 :)
+The Senior Project of Group M6
