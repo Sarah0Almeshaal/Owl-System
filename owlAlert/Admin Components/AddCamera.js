@@ -55,7 +55,7 @@ const AddCamera = ({ handleCallback }) => {
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data["result"] === 1) {
+                if (data["result"] === "Camera is successfully added") {
                     let cam = {
                         "floor": cameraInfo.cameraFloor,
                         "id": cameraInfo.cameraNum

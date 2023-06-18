@@ -35,7 +35,7 @@ function CameraSC() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data["result"] === 1) {
+        if (data["result"] === "Camera is deleted successfully") {
           handleDeleteClick(itemId);
         } else {
           console.log("ERROR");

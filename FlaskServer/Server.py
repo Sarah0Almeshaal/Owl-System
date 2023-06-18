@@ -363,17 +363,20 @@ def addCamera():
 @app.route("/getAlertRecord", methods=["GET"])
 def getAlertRecord():
     try:
-        sqlQuery = "SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE);"
+        sqlQuery = ("SELECT CAST(timestamp AS DATE) AS alertDate, COUNT(timestamp) AS counter FROM " 
+        "send WHERE timestamp > (CURDATE() - INTERVAL 80 DAY) group by CAST(timestamp AS DATE);")
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
         alerts = cursor.fetchall()
         alertList = []
 
-        sqlQueryResolved = "SELECT alertid, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();"
+        sqlQueryResolved = ("SELECT alertid, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON "
+        "owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Resolved' AND DATE(timestamp) = curdate();")
         cursor.execute(sqlQueryResolved)
         resolved = cursor.fetchone()
 
-        sqlQueryUnresolved = "SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();"
+        sqlQueryUnresolved = ("SELECT id, COUNT(*) FROM owlsys.alert INNER JOIN owlsys.send ON "
+        "owlsys.send.alertid = owlsys.alert.id WHERE Status = 'Unresolved' AND DATE(timestamp) = curdate();")
         cursor.execute(sqlQueryUnresolved)
         unresolved = cursor.fetchone()
 
@@ -405,16 +408,15 @@ def deleteCamera():
         cursor = connection.cursor()
         cursor.execute(sqlQuery, (cameraNum,))
         connection.commit()
-        return jsonify({"result": 1})
+        return jsonify({"result": "Camera is deleted successfully"})
     except mysql.connector.Error as e:
         print("Error deleting data into MySQL table", e)
-        return jsonify({"result": -1})
+        return jsonify({"result": "Camera is not deleted"})
 
 
 @app.route("/getCamerasData", methods=["GET"])
 def getData():
     try:
-        sqlQuery = "SELECT id, floornum FROM CAMERA"
         sqlQuery = "SELECT id, floornum FROM CAMERA"
         cursor = connection.cursor()
         cursor.execute(sqlQuery)
@@ -426,10 +428,10 @@ def getData():
                 cameraList.append(camera)
             return jsonify({"cameraList": cameraList})
         else:
-            return jsonify({"cameraList": 0})
+            return jsonify({"cameraList": "There are no cameras Inforamtion"})
     except mysql.connector.Error as e:
         print("Error retrieving data into MySQL table", e)
-        return jsonify({"result": -1})
+        return jsonify({"result": e})
 
 
 @app.route("/getAlertLog", methods=["GET"])
@@ -477,12 +479,15 @@ def alertDetails():
         content = request.json
         alertId = content.get("alertId")
 
-        alertDetailsQuery = """SELECT owlsys.alert.ID, Status, timestamp, owlsys.camera.Id, floornum FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;"""
+        alertDetailsQuery = ("""SELECT owlsys.alert.ID, Status, timestamp, owlsys.camera.Id, floornum "
+        "FROM owlsys.alert INNER JOIN owlsys.send ON owlsys.send.alertID = owlsys.alert.ID INNER JOIN owlsys.camera "
+        "ON owlsys.camera.Id = owlsys.send.camID WHERE alertID = %s ;""")
         detailsCursor = connection.cursor()
         detailsCursor.execute(alertDetailsQuery, (alertId,))
         details = detailsCursor.fetchone()
 
-        respondentsDetailsQuery = """SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = %s ;"""
+        respondentsDetailsQuery = ("""SELECT owlsys.user.ID, Fname, Lname FROM owlsys.receive "
+        "INNER JOIN owlsys.user ON owlsys.receive.userID = owlsys.user.ID WHERE alertID = %s ;""")
         respondentsCursor = connection.cursor()
         respondentsCursor.execute(respondentsDetailsQuery, (alertId,))
         respondentRecord = respondentsCursor.fetchall()
